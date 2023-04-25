@@ -4,6 +4,7 @@
 
 using namespace std;
 
+GLuint texture = 0;
 GLdouble left_m = -100.0;
 GLdouble right_m = 700.0;
 GLdouble bottom_m = -140.0;
@@ -12,13 +13,15 @@ double ok = 1;
 double j = 0.0;
 double i = 0.0;
 double contor = 0;
-double loc_vert = 800;
-int vector[3] = { 0, 160, 320 };
-double height = vector[rand() % 3];
+double loc_vert = 460; // loc_vert e de fapt loc_oriz, adica punctul pe orizontala unde pleaca toti strugurii
+int vector[3] = { 0, 200, 400 };
+double height = vector[rand() % 3]; // height va fi de fapt pozitia pe orizontala a cosului care prinde struguri
 int score = 0;
 double timp = 0.15;
 int pct = 1000;
 double rsj, rdj, rss, rds = 0;
+int vieti = 3;
+
 
 void init(void)
 {
@@ -35,45 +38,61 @@ void RenderString(float x, float y, void* font, const unsigned char* string)
 
 	glutBitmapString(font, string);
 }
+
+
+void background(GLuint texture) {
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glBegin(GL_QUADS);
+	glTexCoord2f(0.0f, 0.0f); glVertex2f(-1.0f, -1.0f);
+	glTexCoord2f(1.0f, 0.0f); glVertex2f(1.0f, -1.0f);
+	glTexCoord2f(1.0f, 1.0f); glVertex2f(1.0f, 1.0f);
+	glTexCoord2f(0.0f, 1.0f); glVertex2f(-1.0f, 1.0f);
+	glEnd();
+}
+
 void startgame(void)
 {
 
-	if (height != j || (loc_vert > 90 || loc_vert < -90))
-	{
+	if (vieti > 0) {
 
 		if (i < -380)
 		{
 			i = 0;
 		}
 		i = i - 2 * timp;
-
 		loc_vert -= timp;
 
-		if (loc_vert < -150)
-		{
-			score += 100;
+
+		//daca cosul e pe aceeasi coloana cu strugurele si in intervalul ..., atunci creste scorul
+		if (height == j) {
+
+			if (loc_vert > -100 && loc_vert < -50) {
+				score += 100;
+				height = vector[rand() % 3];
+				cout << "Score:  " << score << endl;
+				cout << "Nr vieti: " << vieti << endl;
+				loc_vert = 460;
+			}
+		}
+
+		if (loc_vert < -100) {
+			vieti--;
+			loc_vert = 460;
 			height = vector[rand() % 3];
-			cout << "Score:  " << score << endl;
-			loc_vert = 800;
 		}
 
-		if (score >= pct && pct <= 15000)
-		{
-			timp += 0.1;
-			pct += 1000;
-		}
-
-		glutPostRedisplay();
 	}
 	else {
 		ok = 0;
 	}
+
+
 }
 
 void drawScene(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT);
-
+	background(texture);
 
 	glColor3f(0.55, 0.788, 0.451);
 
@@ -92,7 +111,7 @@ void drawScene(void)
 	glVertex2i(700, 460); // Dreapta sus
 	glVertex2i(-100, 460);// Stanga sus
 	glEnd();
-	RenderString(200.0f, 425.0f, GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*)"Depaseste masinile!");
+	RenderString(200.0f, 425.0f, GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*)"Prinde strugurii!");
 
 	// Delimitare sosea
 	glLineWidth(3);
@@ -112,17 +131,17 @@ void drawScene(void)
 
 	// Liniile intrerupte
 	glPushMatrix();
-	glTranslated(i, 0.0, 0.0);
+	glTranslated(0.0, 0.0, 0.0);
 
 
 	glBegin(GL_LINES);
-	glVertex2i(-100, 80);
-	glVertex2i(1500, 80);
+	glVertex2i(100, -80);
+	glVertex2i(100, 400);
 	glEnd();
 
 	glBegin(GL_LINES);
-	glVertex2i(-100, 240);
-	glVertex2i(1500, 240);
+	glVertex2i(300, -80);
+	glVertex2i(300, 400);
 	glEnd();
 	glPopMatrix();
 
@@ -130,7 +149,7 @@ void drawScene(void)
 
 	//desenam masina
 	glPushMatrix();
-	glTranslated(0.0, j, 0.0);
+	glTranslated(j, -50.0, 0.0);
 
 
 
@@ -153,21 +172,20 @@ void drawScene(void)
 		RenderString(250.0f, 200.0f, GLUT_BITMAP_8_BY_13, (const unsigned char*)"GAME OVER");
 	}
 
-	if (contor == 1 && (j != 160 && j != 320))
+	if (contor == 1 && (j != 200 && j != 400))
 		j = j + 1;
-	else if (contor == -1 && (j != 160 && j != 0))
+	else if (contor == -1 && (j != 200 && j != 0))
 		j = j - 1;
 	else {
 		contor = 0;
-
 	}
 
 	//desenam a doua masina (adversara)
 	glPushMatrix();
-	glTranslated(loc_vert, height, 0.0);
+	glTranslated(height, loc_vert, 0.0);
 
 	glColor3f(0.471, 0.667, 0.949);
-	glRecti(-45, -15, 45, 15);
+	glRecti(-15, -45, 15, 45);
 
 
 	glPopMatrix();
@@ -183,16 +201,30 @@ void reshape(int w, int h)
 	glViewport(0, 0, (GLsizei)w, (GLsizei)h);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(-100.0, 700.0, -140.0, 460.0, -1.0, 1.0);
+	glOrtho(left_m, right_m, bottom_m, top_m, -1.0, 1.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
 
-void miscasus(void)
+void miscast(void)
 {
 	if (ok != 0)
 	{
-		if (j < 320)
+		if (j > 0)
+		{
+			contor = -1;
+			j -= 1;
+		}
+
+		glutPostRedisplay();
+	}
+}
+
+void miscadr(void)
+{
+	if (ok != 0)
+	{
+		if (j < 400)
 		{
 			contor = 1;
 			j += 1;
@@ -202,32 +234,15 @@ void miscasus(void)
 	}
 }
 
-void miscajos(void)
-{
-	if (ok != 0)
-	{
-		if (j > 0)
-		{
-			contor = -1;
-			j -= 1;
-
-
-		}
-
-		glutPostRedisplay();
-	}
-}
-
 void keyboard(int key, int x, int y)
 {
 
-
 	switch (key) {
-	case GLUT_KEY_UP:
-		miscasus();
+	case GLUT_KEY_LEFT:
+		miscast();
 		break;
-	case GLUT_KEY_DOWN:
-		miscajos();
+	case GLUT_KEY_RIGHT:
+		miscadr();
 		break;
 
 	}
