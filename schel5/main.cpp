@@ -1,10 +1,10 @@
 #include <iostream>
 #include<windows.h>
+#include<string>
 #include <GL/freeglut.h>
 
 using namespace std;
 
-GLuint texture = 0;
 GLdouble left_m = -100.0;
 GLdouble right_m = 700.0;
 GLdouble bottom_m = -140.0;
@@ -17,17 +17,58 @@ double loc_vert = 460; // loc_vert e de fapt loc_oriz, adica punctul pe orizonta
 int vector[3] = { 0, 200, 400 };
 double height = vector[rand() % 3]; // height va fi de fapt pozitia pe orizontala a cosului care prinde struguri
 int score = 0;
-double timp = 0.15;
+double timp = 0.1;
 int pct = 1000;
 double rsj, rdj, rss, rds = 0;
 int vieti = 3;
 
-
 void init(void)
 {
-	glClearColor(0.98, 0.929, 0.792, 0.0);
+	glClearColor(0.87, 0.8, 0.73, 0.0);
 	glMatrixMode(GL_PROJECTION);
 	glOrtho(left_m, right_m, bottom_m, top_m, -1.0, 1.0);
+}
+
+void DrawCircle(float cx, float cy, float r, int num_segments)
+{
+	GLuint aux;
+	aux = glGenLists(1);
+	glNewList(aux, GL_COMPILE);
+	glBegin(GL_POLYGON);
+	for (int ii = 0; ii < num_segments; ii++)
+	{
+		float theta = 2.0f * 3.1415926f * float(ii) / float(num_segments);//get the current angle
+
+		float x = r * cosf(theta);//calculate the x component
+		float y = r * sinf(theta);//calculate the y component
+
+		glVertex2f(x + cx, y + cy);//output vertex
+
+	}
+	glEnd();
+	glEndList();
+	glCallList(aux);
+}
+
+void DrawElipse(float cx, float cy, float r1, float r2, int num_segments)
+{
+	GLuint aux;
+	aux = glGenLists(1);
+	glNewList(aux, GL_COMPILE);
+	glBegin(GL_POLYGON);
+	for (int ii = 0; ii < num_segments; ii++)
+	{
+		float theta = 2.0f * 3.1415926f * float(ii) / float(num_segments);//get the current angle
+
+		float x = r1 * cosf(theta);//calculate the x component
+		float y = r2 * sinf(theta);//calculate the y component
+
+		glVertex2f(x + cx, y + cy);//output vertex
+
+	}
+	glEnd();
+	glEndList();
+	glCallList(aux);
 }
 
 void RenderString(float x, float y, void* font, const unsigned char* string)
@@ -39,20 +80,8 @@ void RenderString(float x, float y, void* font, const unsigned char* string)
 	glutBitmapString(font, string);
 }
 
-
-void background(GLuint texture) {
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glBegin(GL_QUADS);
-	glTexCoord2f(0.0f, 0.0f); glVertex2f(-1.0f, -1.0f);
-	glTexCoord2f(1.0f, 0.0f); glVertex2f(1.0f, -1.0f);
-	glTexCoord2f(1.0f, 1.0f); glVertex2f(1.0f, 1.0f);
-	glTexCoord2f(0.0f, 1.0f); glVertex2f(-1.0f, 1.0f);
-	glEnd();
-}
-
 void startgame(void)
 {
-
 	if (vieti > 0) {
 
 		if (i < -380)
@@ -69,13 +98,11 @@ void startgame(void)
 			if (loc_vert > -100 && loc_vert < -50) {
 				score += 100;
 				height = vector[rand() % 3];
-				cout << "Score:  " << score << endl;
-				cout << "Nr vieti: " << vieti << endl;
 				loc_vert = 460;
 			}
 		}
 
-		if (loc_vert < -100) {
+		if (loc_vert <= -100) {
 			vieti--;
 			loc_vert = 460;
 			height = vector[rand() % 3];
@@ -86,75 +113,120 @@ void startgame(void)
 		ok = 0;
 	}
 
+}
+
+void deseneazaStrugure() {
+
+	// ramura
+	glColor3f(0.56, 0.34, 0.21);
+	glRecti(-3, 35, 3, 15);
+	//DrawCircle(0, 35, 3, 10);
+
+	glEnable(GL_POINT_SMOOTH);
+	glPointSize(6.0);
+	glBegin(GL_POINTS);
+	glVertex2f(0, 35);
+	glEnd();
+
+
+	// boabele
+	glColor3f(0.22, 0.07, 0.35); // mov inchis
+	glColor3f(0.51, 0.12, 0.63); // mov mai deschis decat cel de sus
+
+	/*DrawCircle(-15, 15, 7, 100);
+	DrawCircle(-5, 15, 7, 100);
+	DrawCircle(5, 15, 7, 100);
+	DrawCircle(15, 15, 7, 100);
+
+	DrawCircle(-10, 5, 7, 100);
+	DrawCircle(0, 5, 7, 100);
+	DrawCircle(10, 5, 7, 100);
+
+	DrawCircle(-5, -5, 7, 100);
+	DrawCircle(5, -5, 7, 100);
+
+	DrawCircle(0, -15, 7, 100);*/
+
+	glEnable(GL_POINT_SMOOTH);
+	glPointSize(12.0);
+	glBegin(GL_POINTS);
+	glVertex2f(-15, 15);
+	glVertex2f(-5, 15);
+	glVertex2f(5, 15);
+	glVertex2f(15, 15);
+
+	glVertex2f(-10, 5);
+	glVertex2f(0, 5);
+	glVertex2f(10, 5);
+
+	glVertex2f(-5, -5);
+	glVertex2f(5, -5);
+
+	glVertex2f(0, -15);
+	glEnd();
+
+	// frunza
+	glColor3f(0.2, 0.67, 0.13);
+	DrawElipse(12, 21, 12, 5, 100);
+}
+
+void deseneazaInimi() {
+
+	string sir = "Scor: " + to_string(score);
+
+	const char* str = sir.c_str();
+
+	RenderString(530.0f, 400.0f, GLUT_BITMAP_9_BY_15, (const unsigned char*)str);
+
+	glColor3f(0.78, 0.16, 0.15);
+
+	int x_st = 520, y_st = 350, dist = 50;
+
+	for (int i = 0; i < vieti; i++)
+	{
+		DrawCircle(-10 + x_st + i * dist, 0 + y_st, 10, 50);
+		DrawCircle(10 + x_st + i * dist, 0 + y_st, 10, 50);
+
+		glBegin(GL_TRIANGLES);
+		glVertex2f(-20 + x_st + i * dist, -3 + y_st);
+		glVertex2f(20 + x_st + i * dist, -3 + y_st);
+		glVertex2f(0 + x_st + i * dist, -30 + y_st);
+		glEnd();
+	}
+
+}
+
+void deseneazaLada() {
+
+	glColor3f(0.71, 0.28, 0.0);
+	glRecti(-45, -15, -35, 30);
+	glRecti(35, -15, 45, 30);
+
+	glColor3f(0.8, 0.48, 0.13);
+	glRecti(-45, -15, 45, 0);
+	glRecti(-45, 5, 45, 20);
 
 }
 
 void drawScene(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT);
-	background(texture);
 
-	glColor3f(0.55, 0.788, 0.451);
-
-	// Iarba de jos
+	glColor3f(0.78, 0.69, 0.65);
 	glBegin(GL_POLYGON);
-	glVertex2i(-100, -140);// Stanga jos
+	glVertex2i(460, -140);// Stanga jos
 	glVertex2i(700, -140); // Dreapta jos
-	glVertex2i(700, -80);  // Dreapta sus
-	glVertex2i(-100, -80); // Stanga sus
+	glVertex2i(700, 460);  // Dreapta sus
+	glVertex2i(460, 460); // Stanga sus
 	glEnd();
 
-	// Iarba de sus
-	glBegin(GL_POLYGON);
-	glVertex2i(-100, 400);// Stanga jos
-	glVertex2i(700, 400); // Dreapta jos
-	glVertex2i(700, 460); // Dreapta sus
-	glVertex2i(-100, 460);// Stanga sus
-	glEnd();
-	RenderString(200.0f, 425.0f, GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*)"Prinde strugurii!");
 
-	// Delimitare sosea
-	glLineWidth(3);
-	glColor3f(1, 1, 1);
-
-	// Delimitam soseaua de iarba partea de jos
-	glBegin(GL_LINES);
-	glVertex2i(-100, -80);
-	glVertex2i(1500, -80);
-	glEnd();
-
-	// Delimitam soseaua de iarba partea de sus
-	glBegin(GL_LINES);
-	glVertex2i(-100, 400);
-	glVertex2i(1500, 400);
-	glEnd();
-
-	// Liniile intrerupte
+	//desenam cosul/butoiul/lada
 	glPushMatrix();
-	glTranslated(0.0, 0.0, 0.0);
+	glTranslated(j, -100.0, 0.0);
 
-
-	glBegin(GL_LINES);
-	glVertex2i(100, -80);
-	glVertex2i(100, 400);
-	glEnd();
-
-	glBegin(GL_LINES);
-	glVertex2i(300, -80);
-	glVertex2i(300, 400);
-	glEnd();
-	glPopMatrix();
-
-
-
-	//desenam masina
-	glPushMatrix();
-	glTranslated(j, -50.0, 0.0);
-
-
-
-	glColor3f(0.996, 0.365, 0.149);
-	glRecti(-45, -15, 45, 15);
+	//glColor3f(0.996, 0.365, 0.149);
+	deseneazaLada();
 
 	if (ok == 0)
 	{
@@ -163,7 +235,6 @@ void drawScene(void)
 		rdj = -8;
 		rds = 8;
 	}
-
 
 	glPopMatrix();
 	glPopMatrix();
@@ -180,15 +251,13 @@ void drawScene(void)
 		contor = 0;
 	}
 
-	//desenam a doua masina (adversara)
+	//desenam strugurele
 	glPushMatrix();
 	glTranslated(height, loc_vert, 0.0);
-
-	glColor3f(0.471, 0.667, 0.949);
-	glRecti(-15, -45, 15, 45);
-
-
+	deseneazaStrugure();
 	glPopMatrix();
+
+	deseneazaInimi();
 
 	startgame();
 	glutPostRedisplay();
@@ -201,7 +270,7 @@ void reshape(int w, int h)
 	glViewport(0, 0, (GLsizei)w, (GLsizei)h);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(left_m, right_m, bottom_m, top_m, -1.0, 1.0);
+	glOrtho(-100.0, 700.0, -140.0, 460.0, -1.0, 1.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
@@ -249,14 +318,13 @@ void keyboard(int key, int x, int y)
 
 }
 
-
 int main(int argc, char** argv)
 {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
 	glutInitWindowSize(800, 600);
 	glutInitWindowPosition(100, 100);
-	glutCreateWindow("Depaseste masinile - mini game");
+	glutCreateWindow("Prinde strugurii");
 	init();
 	glutDisplayFunc(drawScene);
 	glutReshapeFunc(reshape);
