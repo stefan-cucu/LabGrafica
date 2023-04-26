@@ -182,10 +182,27 @@ void deseneazaInimi() {
 
 	int x_st = 520, y_st = 350, dist = 50;
 
-	for (int i = 0; i < vieti; i++)
+	/*for (int i = 0; i < vieti; i++)
 	{
 		DrawCircle(-10 + x_st + i * dist, 0 + y_st, 10, 50);
 		DrawCircle(10 + x_st + i * dist, 0 + y_st, 10, 50);
+
+		glBegin(GL_TRIANGLES);
+		glVertex2f(-20 + x_st + i * dist, -3 + y_st);
+		glVertex2f(20 + x_st + i * dist, -3 + y_st);
+		glVertex2f(0 + x_st + i * dist, -30 + y_st);
+		glEnd();
+	}*/
+
+
+	for (int i = 0; i < vieti; i++)
+	{
+		glEnable(GL_POINT_SMOOTH);
+		glPointSize(20.0);
+		glBegin(GL_POINTS);
+		glVertex2f(-10 + x_st + i * dist, 0 + y_st);
+		glVertex2f(10 + x_st + i * dist, 0 + y_st);
+		glEnd();
 
 		glBegin(GL_TRIANGLES);
 		glVertex2f(-20 + x_st + i * dist, -3 + y_st);
