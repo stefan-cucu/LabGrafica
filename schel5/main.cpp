@@ -13,7 +13,7 @@ double ok = 1;
 double j = 0.0;
 double i = 0.0;
 double contor = 0;
-double loc_vert = 460; // loc_vert e de fapt loc_oriz, adica punctul pe orizontala unde pleaca toti strugurii
+double loc_vert = 420; // loc_vert e de fapt loc_oriz, adica punctul pe orizontala unde pleaca toti strugurii
 int vector[3] = { 0, 200, 400 };
 double height = vector[rand() % 3]; // height va fi de fapt pozitia pe orizontala a cosului care prinde struguri
 int score = 0;
@@ -98,13 +98,13 @@ void startgame(void)
 			if (loc_vert > -100 && loc_vert < -50) {
 				score += 100;
 				height = vector[rand() % 3];
-				loc_vert = 460;
+				loc_vert = 420;
 			}
 		}
 
 		if (loc_vert <= -100) {
 			vieti--;
-			loc_vert = 460;
+			loc_vert = 420;
 			height = vector[rand() % 3];
 		}
 
@@ -275,6 +275,15 @@ void drawScene(void)
 	glPopMatrix();
 
 	deseneazaInimi();
+	glColor3f(0.78, 0.69, 0.65);
+	// Iarba de sus
+	glBegin(GL_POLYGON);
+	glVertex2i(-100, 420);// Stanga jos
+	glVertex2i(700, 420); // Dreapta jos
+	glVertex2i(700, 460); // Dreapta sus
+	glVertex2i(-100, 460);// Stanga sus
+	glEnd();
+	RenderString(200.0f, 432.0f, GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*)"Prinde strugurii!");
 
 	startgame();
 	glutPostRedisplay();
