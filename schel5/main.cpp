@@ -1,7 +1,8 @@
 #include <iostream>
-#include<windows.h>
-#include<string>
+#include <windows.h>
+#include <string>
 #include <GL/freeglut.h>
+#include <SOIL.h>
 
 using namespace std;
 
