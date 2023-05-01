@@ -3,7 +3,7 @@
 #include <string>
 #include <GL/freeglut.h>
 #include <SOIL.h>
-
+#include <vector>
 using namespace std;
 
 GLdouble left_m = -100.0;
@@ -15,14 +15,15 @@ double j = 0.0;
 double i = 0.0;
 double contor = 0;
 double loc_vert = 420; // loc_vert e de fapt loc_oriz, adica punctul pe orizontala unde pleaca toti strugurii
-int vector[3] = { 0, 200, 400 };
-double height = vector[rand() % 3]; // height va fi de fapt pozitia pe orizontala a cosului care prinde struguri
+int veclanes[3] = { 0, 200, 400 };
+double height = veclanes[rand() % 3]; // height va fi de fapt pozitia pe orizontala a cosului care prinde struguri
 int score = 0;
 double timp = 0.1;
 int pct = 1000;
 double rsj, rdj, rss, rds = 0;
 int vieti = 3;
-
+vector<string> playerNames = { "Player 1", "Player 2", "Player 3" };
+vector<int> playerScores = { 100, 90, 80 };
 void init(void)
 {
 	glClearColor(0.87, 0.8, 0.73, 0.0);
@@ -98,7 +99,7 @@ void startgame(void)
 
 			if (loc_vert > -100 && loc_vert < -50) {
 				score += 100;
-				height = vector[rand() % 3];
+				height = veclanes[rand() % 3];
 				loc_vert = 420;
 			}
 		}
@@ -106,7 +107,7 @@ void startgame(void)
 		if (loc_vert <= -100) {
 			vieti--;
 			loc_vert = 420;
-			height = vector[rand() % 3];
+			height = veclanes[rand() % 3];
 		}
 
 	}
@@ -259,6 +260,13 @@ void drawScene(void)
 
 	if (ok == 0) {
 		RenderString(250.0f, 200.0f, GLUT_BITMAP_8_BY_13, (const unsigned char*)"GAME OVER");
+		RenderString(530.0f, 380.0f, GLUT_BITMAP_8_BY_13, (const unsigned char*)"LEADERBOARD:");
+		for (int i = 0; i < playerNames.size(); i++) {
+			string playerName = playerNames[i];
+			int playerScore = playerScores[i];
+			string playerString = to_string(i + 1) + ". " + playerName + " - " + to_string(playerScore) + " points";
+			RenderString(490.0f, 360.0f - i * 20, GLUT_BITMAP_8_BY_13, (const unsigned char*)playerString.c_str());
+		}
 	}
 
 	if (contor == 1 && (j != 200 && j != 400))
