@@ -3,7 +3,7 @@
 #include <string>
 #include <GL/freeglut.h>
 #include <SOIL.h>
-#include <vector>
+#include <map>
 using namespace std;
 
 GLdouble left_m = -100.0;
@@ -22,8 +22,8 @@ double timp = 0.1;
 int pct = 1000;
 double rsj, rdj, rss, rds = 0;
 int vieti = 3;
-vector<string> playerNames = { "Player 1", "Player 2", "Player 3" };
-vector<int> playerScores = { 100, 90, 80 };
+map<int, string, greater<int>> playerScores;
+
 void init(void)
 {
 	glClearColor(0.87, 0.8, 0.73, 0.0);
@@ -260,12 +260,30 @@ void drawScene(void)
 
 	if (ok == 0) {
 		RenderString(250.0f, 200.0f, GLUT_BITMAP_8_BY_13, (const unsigned char*)"GAME OVER");
+		// Update a player's score
+		string playerName = "Player 1";
+		int newScore = score;
+		for (auto& player : playerScores) {
+			if (player.second == playerName) {
+				playerScores.erase(player.first); // Remove old score
+				playerScores[newScore] = playerName; // Add new score
+				break; // Stop searching once found
+			}
+		}
+
 		RenderString(530.0f, 380.0f, GLUT_BITMAP_8_BY_13, (const unsigned char*)"LEADERBOARD:");
-		for (int i = 0; i < playerNames.size(); i++) {
-			string playerName = playerNames[i];
-			int playerScore = playerScores[i];
-			string playerString = to_string(i + 1) + ". " + playerName + " - " + to_string(playerScore) + " points";
-			RenderString(490.0f, 360.0f - i * 20, GLUT_BITMAP_8_BY_13, (const unsigned char*)playerString.c_str());
+
+		// Render the leaderboard
+		float x = 490.0f;
+		float y = 360.0f;
+		int rank = 1;
+		for (const auto& player : playerScores) {
+			string name = player.second;
+			int score = player.first;
+			string text = "Rank " + to_string(rank) + ": " + name + " - " + to_string(score);
+			RenderString(x, y, GLUT_BITMAP_8_BY_13, (const unsigned char*)text.c_str());
+			y -= 20.0f;
+			rank++;
 		}
 	}
 
@@ -355,6 +373,9 @@ void keyboard(int key, int x, int y)
 
 int main(int argc, char** argv)
 {
+	playerScores[100] = "Player 1";
+	playerScores[900] = "Player 2";
+	playerScores[80] = "Player 3";
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
 	glutInitWindowSize(800, 600);
