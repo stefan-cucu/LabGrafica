@@ -44,6 +44,9 @@ int l = 6;
 int c = 181;
 int l_curr = -1;
 
+float scale_factor = 1.0f; // factorul de scalare
+float pulse_speed = 0.01f; // viteza pulsului
+
 typedef struct {
 	float x, y;
 }Point2D;
@@ -271,7 +274,7 @@ void deseneazaStrugure() {
 	DrawElipse(12, 21, 12, 5, 100);
 }
 
-void deseneazaInimi() {
+void deseneazaInimi(float scale_factor) {
 
 	string sir = "Scor: " + to_string(score);
 
@@ -295,7 +298,7 @@ void deseneazaInimi() {
 		glEnd();
 	}*/
 
-
+	glScalef(1, scale_factor, 1);
 	for (int i = 0; i < vieti; i++)
 	{
 		glEnable(GL_POINT_SMOOTH);
@@ -627,8 +630,13 @@ void drawScene(void)
 		deseneazaStrugure();
 	glPopMatrix();
 
-	deseneazaInimi();
+	// Calculeaza factorul de scalare cu ajutorul functiei sinusoidale
+	scale_factor = 1.0f + sin(glutGet(GLUT_ELAPSED_TIME) * pulse_speed) * 0.01f;
 
+	glPushMatrix();
+		deseneazaInimi(scale_factor);
+	glPopMatrix();
+	
 	glColor3f(0.78, 0.69, 0.65);
 	glBegin(GL_POLYGON);
 		glVertex2i(-100, 420);// Stanga jos
@@ -1093,7 +1101,7 @@ bool loginRequest()
 	if (curl) {
 		string postData = "{\"username\":\"" + username + "\",\"password\":\"" + password + "\"}";
 
-		curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:5000/login");
+		curl_easy_setopt(curl, CURLOPT_URL, "https://grafica-backend.onrender.com/login");
 		curl_easy_setopt(curl, CURLOPT_POST, 1L);
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postData.c_str());
 
@@ -1138,7 +1146,7 @@ bool signupRequest()
 	if (curl) {
 		string postData = "{\"username\":\"" + username + "\",\"password\":\"" + password + "\"}";
 		
-		curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:5000/signup");
+		curl_easy_setopt(curl, CURLOPT_URL, "https://grafica-backend.onrender.com/signup");
 		curl_easy_setopt(curl, CURLOPT_POST, 1L);
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postData.c_str());
 
@@ -1181,7 +1189,7 @@ bool storeScoreRequest(int score)
 	if (curl) {
 		string postData = "{\"username\":\"" + username + "\",\"score\":\"" + to_string(score) + "\"}";
 
-		curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:5000/store_score");
+		curl_easy_setopt(curl, CURLOPT_URL, "https://grafica-backend.onrender.com/store_score");
 		curl_easy_setopt(curl, CURLOPT_POST, 1L);
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postData.c_str());
 
@@ -1222,7 +1230,7 @@ void getLeaderboardDataRequest()
 	CURL* curl = curl_easy_init();
 	vector<pair<int, string>> scores;
 	if (curl) {
-		curl_easy_setopt(curl, CURLOPT_URL, "http://localhost:5000/top_scores");
+		curl_easy_setopt(curl, CURLOPT_URL, "https://grafica-backend.onrender.com/top_scores");
 
 		string response;
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
