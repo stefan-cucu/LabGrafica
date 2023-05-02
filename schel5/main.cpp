@@ -32,7 +32,7 @@ int pct = 1000;
 double rsj, rdj, rss, rds = 0;
 int vieti = 3;
 map<int, string, greater<int>> playerScores;
-bool gotData = 0;
+int window_width = 800, window_height = 600;
 void (*currentScene)(void);
 
 bool storeScoreRequest(int score);
@@ -343,6 +343,8 @@ void drawScene(void)
 void reshape(int w, int h)
 {
 	glViewport(0, 0, (GLsizei)w, (GLsizei)h);
+	window_width = w; window_height = h;
+	glutReshapeWindow(800, 600); // TODO: FIX THIS?
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(-100.0, 700.0, -140.0, 460.0, -1.0, 1.0);
