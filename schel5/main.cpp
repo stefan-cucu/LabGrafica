@@ -9,6 +9,10 @@
 #include <cstdio>
 #include <vector>
 #include <map>
+#include <mmsystem.h>
+#include <thread>
+
+#pragma comment(lib, "winmm.lib")
 
 #define PI 3.14159265359
 
@@ -41,6 +45,10 @@ int vieti = 3;
 int currentProp = 0;
 map<int, string, greater<int>> playerScores;
 int window_width = 800, window_height = 600;
+int currentMenuPhase = 0, currentInputSelect = -1, currentSceneIndex = 0, currentMenuHoverBtn = 0;
+bool showErrorMsg = 0;
+string username = "", password = "", errorMsg = "";
+CURL* curl;
 void (*currentScene)(void);
 
 int l = 6;
@@ -59,6 +67,17 @@ Point2D mat[6][181];
 bool storeScoreRequest(int score);
 void getLeaderboardDataRequest();
 
+void resetStats() {
+	contor = 0;
+	loc_vert = 420; // loc_vert e de fapt loc_oriz, adica punctul pe orizontala unde pleaca toti strugurii
+	height = vecpos[rand() % 3]; // height va fi de fapt pozitia pe orizontala a cosului care prinde struguri
+	score = 0;
+	difModifier = 1;
+	vieti = 3;
+	currentProp = 0;
+	ok = 1;
+}
+
 void init(void)
 {
 	glClearColor(0.87, 0.8, 0.73, 0.0);
@@ -67,6 +86,21 @@ void init(void)
 	gluOrtho2D(left_m - 1000, right_m + 1000, bottom_m - 1000, top_m + 1000);
 }
 
+void PlayMenuSong()
+{
+	PlaySound(L".\\music\\menu.wav", NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
+}
+
+void PlayGameSong()
+{
+	PlaySound(L".\\music\\game.wav", NULL, SND_FILENAME | SND_ASYNC | SND_LOOP);
+}
+
+void PlayEndSong()
+{
+	PlaySound(L".\\music\\end.wav", NULL, SND_FILENAME | SND_ASYNC);
+
+}
 
 void genereaza_pct_arc_elipsa(float a, float b, float start_angle, float end_angle) {
 	int nr = 0;
@@ -185,6 +219,61 @@ void RenderString(float x, float y, void* font, const unsigned char* string)
 	glutBitmapString(font, string);
 }
 
+void DrawRays(float cx, float cy, float r, float offset, int num_rays);
+void DrawBezier(point m, point n, point p, int num_segments);
+
+void menuBarrel()
+{
+	// Draw Barrel
+
+	glColor3f(0.79, 0.56, 0.35);
+	glBegin(GL_TRIANGLES);
+	glVertex2f(185.8, -10.1);
+	glVertex2f(174.6, -83.5);
+	glVertex2f(420.2, -83.5);
+
+	glVertex2f(420.2, -83.5);
+	glVertex2f(403.6, -20.0);
+	glVertex2f(185.8, -10.1);
+	glEnd();
+
+	glColor3f(0, 0, 0);
+	DrawCircle(300, 180, 230, 30);
+	glColor3f(0.79, 0.56, 0.35);
+	DrawCircle(300, 180, 223, 30);
+
+	glColor3f(0, 0, 0);
+	DrawCircle(300, 180, 210, 30);
+	glColor3f(0.79, 0.56, 0.35);
+	DrawCircle(300, 180, 203, 30);
+
+
+	glColor3f(0, 0, 0);
+	glLineWidth(10.0f);
+	DrawRays(300, 180, 205, 23, 15);
+
+	// Draw barrel stand
+
+	glLineWidth(5.0f);
+
+	glBegin(GL_LINES);
+
+	glVertex2f(185.8, -10.1);
+	glVertex2f(177.1, -53.75);
+
+	glVertex2f(175.1, -53.75);
+	glVertex2f(187.0, -53.75);
+
+	glVertex2f(174.6, -83.5);
+	glVertex2f(420.2, -83.5);
+
+	glVertex2f(420.2, -83.5);
+	glVertex2f(403.6, -20.0);
+
+	glEnd();
+	DrawBezier(make_pair(185.9, -53.75), make_pair(170.8, -64.5), make_pair(174.6, -83.5), 3);
+}
+
 void startgame(void)
 {
 	if (vieti > 0) {
@@ -209,8 +298,7 @@ void startgame(void)
 				currentProp = rand() % 2 == 1 ? 1 : 0;
 				difModifier = currentProp == 1 ? 2 : 1;
 				loc_vert = 420;
-				timp += SPEED_INCREASE_PER_GRAPE;
-			}
+				timp += SPEED_INCREASE_PER_GRAPE;			}
 		}
 
 		if (loc_vert <= -100) {
@@ -228,6 +316,7 @@ void startgame(void)
 			ok = 0;
 			storeScoreRequest(score);
 			getLeaderboardDataRequest();
+			PlayEndSong();
 		}
 	}
 }
@@ -599,36 +688,7 @@ void drawScene(void)
 			rds = 8;
 		}
 	glPopMatrix();
-
-	if (ok == 0) {
-		RenderString(250.0f, 200.0f, GLUT_BITMAP_8_BY_13, (const unsigned char*)"GAME OVER");
-		// Update a player's score
-		string playerName = "Player 1";
-		int newScore = score;
-		for (auto& player : playerScores) {
-			if (player.second == playerName) {
-				playerScores.erase(player.first); // Remove old score
-				playerScores[newScore] = playerName; // Add new score
-				break; // Stop searching once found
-			}
-		}
-
-		RenderString(530.0f, 380.0f, GLUT_BITMAP_8_BY_13, (const unsigned char*)"LEADERBOARD:");
-
-		// Render the leaderboard
-		float x = 490.0f;
-		float y = 360.0f;
-		int rank = 1;
-		for (const auto& player : playerScores) {
-			string name = player.second;
-			int score = player.first;
-			string text = "Rank " + to_string(rank) + ": " + name + " - " + to_string(score);
-			RenderString(x, y, GLUT_BITMAP_8_BY_13, (const unsigned char*)text.c_str());
-			y -= 20.0f;
-			rank++;
-		}
-	}
-
+	
 	if (contor == 1 && (j != 200 && j != 400))
 		j = j + 1;
 	else if (contor == -1 && (j != 200 && j != 0))
@@ -667,6 +727,40 @@ void drawScene(void)
 		glVertex2i(-100, 460);// Stanga sus
 	glEnd();
 	RenderString(200.0f, 432.0f, GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*)"Prinde strugurii!");
+
+	if (ok == 0) {
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		glColor4f(0.0, 0.0, 0.0, 0.4);
+		glRectf(-200, -200, 1000, 1000);
+
+		menuBarrel();
+		RenderString(220.0f, 300.0f, GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*)"GAME OVER");
+		RenderString(205.0f, 270.0f, GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*)"LEADERBOARD:");
+
+		// Render the leaderboard
+		float x = 205.0f;
+		float y = 250.0f;
+		int rank = 1;
+		for (const auto& player : playerScores) {
+			if (y < 50) continue; // Only show 10
+			string name = player.second;
+			int score = player.first;
+			string text = "Rank " + to_string(rank) + ": " + name + " - " + to_string(score);
+			RenderString(x, y, GLUT_BITMAP_8_BY_13, (const unsigned char*)text.c_str());
+			y -= 20.0f;
+			rank++;
+		}
+		RenderString(225.0f, 20.0f, GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*)"Back to menu");
+		if (currentMenuHoverBtn == 1) {
+			glLineWidth(2.0f);
+			glBegin(GL_LINES);
+			glVertex2f(225.0f, 10.0f);
+			glVertex2f(365.0f, 10.0f);
+			glEnd();
+		}
+	}
 
 	startgame();
 	glutPostRedisplay();
@@ -747,10 +841,7 @@ void DrawBottle(int i, int j)
 	glRectf(i + 1.5, j+60, i + 18.5, j + 75);
 }
 
-int currentMenuPhase = 0, currentInputSelect = -1, currentSceneIndex = 0, currentMenuHoverBtn = 0;
-bool showErrorMsg = 0;
-string username="", password="", errorMsg="";
-CURL* curl;
+
 void drawMenu(void)
 {
 	glClearColor(0.20, 0.09, 0.11, 0.0);
@@ -849,54 +940,7 @@ void drawMenu(void)
 	glRectf(-70, 115, 670, 130);
 	glRectf(-70, 300, 670, 315);
 
-	// Draw Barrel
-
-	glColor3f(0.79, 0.56, 0.35);
-	glBegin(GL_TRIANGLES);
-	glVertex2f(185.8, -10.1);
-	glVertex2f(174.6, -83.5);
-	glVertex2f(420.2, -83.5);
-
-	glVertex2f(420.2, -83.5);
-	glVertex2f(403.6, -20.0);
-	glVertex2f(185.8, -10.1);
-	glEnd();
-
-	glColor3f(0, 0, 0);
-	DrawCircle(300, 180, 230, 30); 
-	glColor3f(0.79, 0.56, 0.35);
-	DrawCircle(300, 180, 223, 30);
-
-	glColor3f(0, 0, 0);
-	DrawCircle(300, 180, 210, 30);
-	glColor3f(0.79, 0.56, 0.35);
-	DrawCircle(300, 180, 203, 30);
-
-
-	glColor3f(0, 0, 0);
-	glLineWidth(10.0f); 
-	DrawRays(300, 180, 205, 23, 15);
-
-	// Draw barrel stand
-
-	glLineWidth(5.0f);
-
-	glBegin(GL_LINES);
-
-	glVertex2f(185.8, -10.1);
-	glVertex2f(177.1, -53.75);
-
-	glVertex2f(175.1, -53.75);
-	glVertex2f(187.0, -53.75);
-
-	glVertex2f(174.6, -83.5);
-	glVertex2f(420.2, -83.5);
-
-	glVertex2f(420.2, -83.5);
-	glVertex2f(403.6, -20.0);
-
-	glEnd();
-	DrawBezier(make_pair(185.9, -53.75), make_pair(170.8, -64.5), make_pair(174.6, -83.5), 3);
+	menuBarrel();
 
 	RenderString(180.0f, 280.0f, GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*)"<NUMELE JOCULUI>");
 	
@@ -1361,85 +1405,114 @@ void handleClick(int button, int state, int x, int y)
 			}
 		}
 	}
-	else if (currentMenuPhase == 0 || currentMenuPhase == 1) {
-		if (state == GLUT_DOWN) {
-			if (x >= 200 && x <= 500 && 460 - y >= 200 && 460 - y <= 240)
-				currentInputSelect = 0;
-			if (x >= 200 && x <= 500 && 460 - y >= 140 && 460 - y <= 180)
-				currentInputSelect = 1;
+	else if (currentSceneIndex == 0) {
+		if (currentMenuPhase == 0 || currentMenuPhase == 1) {
+			if (state == GLUT_DOWN) {
+				if (x >= 200 && x <= 500 && 460 - y >= 200 && 460 - y <= 240)
+					currentInputSelect = 0;
+				if (x >= 200 && x <= 500 && 460 - y >= 140 && 460 - y <= 180)
+					currentInputSelect = 1;
 
-			if (700 - x >= 250 && 700 - x <= 350 && 460 - y >= 85 && 460 - y <= 110) {
-				username = "";
-				password = "";
-				currentInputSelect = -1;
-				currentMenuPhase = currentMenuPhase == 0 ? 1 : 0;
-			}
-			if (700 - x >= 270 && 700 - x <= 330 && 460 - y >= 45 && 460 - y <= 70)
-			{
-				if (currentMenuPhase == 0) {
-					if (loginRequest()) {
-						saveUser();
-						currentMenuPhase = 2;
-					}
-					else {
-						showErrorMsg = 1;
-					}
+				if (700 - x >= 250 && 700 - x <= 350 && 460 - y >= 85 && 460 - y <= 110) {
+					username = "";
+					password = "";
+					currentInputSelect = -1;
+					currentMenuPhase = currentMenuPhase == 0 ? 1 : 0;
 				}
-				else {
-					if (signupRequest()) {
-						saveUser();
-						currentMenuPhase = 2;
+				if (700 - x >= 270 && 700 - x <= 330 && 460 - y >= 45 && 460 - y <= 70)
+				{
+					if (currentMenuPhase == 0) {
+						if (loginRequest()) {
+							saveUser();
+							currentMenuPhase = 2;
+						}
+						else {
+							showErrorMsg = 1;
+						}
 					}
 					else {
-						showErrorMsg = 1;
+						if (signupRequest()) {
+							saveUser();
+							currentMenuPhase = 2;
+						}
+						else {
+							showErrorMsg = 1;
+						}
 					}
 				}
 			}
 		}
+		else if (currentMenuPhase == 2) {
+			if (state == GLUT_DOWN) {
+				x = 700 - x;
+				if (x >= 240 && x <= 350 && 460 - y >= 190 && 460 - y <= 230)
+				{
+					currentSceneIndex = 1;
+					resetStats();
+					PlayGameSong();
+					glutDisplayFunc(drawScene);
+					currentMenuHoverBtn = 0;
+				}
+				else if (x >= 250 && x <= 340 && 460 - y >= 140 && 460 - y <= 180)
+				{
+					currentMenuPhase = 0;
+					username = "";
+					password = "";
+					remove("saved.txt");
+				}
+				else if (x >= 270 && x <= 320 && 460 - y >= 90 && 460 - y <= 130)
+				{
+					exit(0);
+				}
+				else currentMenuHoverBtn = 0;
+			}
+		}
 	}
-	else if (currentMenuPhase == 2) {
-		if (state == GLUT_DOWN) {
+	else {
+		if (ok == 0 && state == GLUT_DOWN) {
 			x = 700 - x;
-			if (x >= 240 && x <= 350 && 460 - y >= 190 && 460 - y <= 230)
+			if (x >= 225 && x <= 370 && 460 - y >= 0 && 460 - y <= 50)
 			{
-				currentSceneIndex = 1;
-				glutDisplayFunc(drawScene);
+				currentSceneIndex = 0;
+				PlayMenuSong();
+				glutDisplayFunc(drawMenu);
+				currentMenuHoverBtn = 0;
 			}
-			else if (x >= 250 && x <= 340 && 460 - y >= 140 && 460 - y <= 180)
-			{
-				currentMenuPhase = 0;
-				username = "";
-				password = "";
-				remove("saved.txt");
-			}
-			else if (x >= 270 && x <= 320 && 460 - y >= 90 && 460 - y <= 130)
-			{
-				exit(0);
-			}
-			else currentMenuHoverBtn = 0;
 		}
 	}
 }
 
 void handleHover(int x, int y)
 {
-	if (currentMenuPhase == 0 || currentMenuPhase == 1) {
-		x = 700 - x;
-		if (x >= 250 && x <= 350 && 460 - y >= 85 && 460 - y <= 110)
-			currentMenuHoverBtn = 1;
-		else if (x >= 270 && x <= 330 && 460 - y >= 45 && 460 - y <= 70)
-			currentMenuHoverBtn = 2;
-		else currentMenuHoverBtn = 0;
+	if (currentSceneIndex == 0) {
+		if (currentMenuPhase == 0 || currentMenuPhase == 1) {
+			x = 700 - x;
+			if (x >= 250 && x <= 350 && 460 - y >= 85 && 460 - y <= 110)
+				currentMenuHoverBtn = 1;
+			else if (x >= 270 && x <= 330 && 460 - y >= 45 && 460 - y <= 70)
+				currentMenuHoverBtn = 2;
+			else currentMenuHoverBtn = 0;
+		}
+		if (currentMenuPhase == 2) {
+			x = 700 - x;
+			if (x >= 240 && x <= 350 && 460 - y >= 190 && 460 - y <= 230)
+				currentMenuHoverBtn = 1;
+			else if (x >= 250 && x <= 340 && 460 - y >= 140 && 460 - y <= 180)
+				currentMenuHoverBtn = 2;
+			else if (x >= 270 && x <= 320 && 460 - y >= 90 && 460 - y <= 130)
+				currentMenuHoverBtn = 3;
+			else currentMenuHoverBtn = 0;
+		}
 	}
-	if (currentMenuPhase == 2) {
-		x = 700 - x;
-		if (x >= 240 && x <= 350 && 460 - y >= 190 && 460 - y <= 230)
-			currentMenuHoverBtn = 1;
-		else if (x >= 250 && x <= 340 && 460 - y >= 140 && 460 - y <= 180)
-			currentMenuHoverBtn = 2;
-		else if (x >= 270 && x <= 320 && 460 - y >= 90 && 460 - y <= 130)
-			currentMenuHoverBtn = 3;
-		else currentMenuHoverBtn = 0;
+	else {
+		if (ok == 0) {
+			x = 700 - x;
+			if (x >= 225 && x <= 370 && 460 - y >= 0 && 460 - y <= 50)
+			{
+				currentMenuHoverBtn = 1;
+			}
+			else currentMenuHoverBtn = 0;
+		}
 	}
 }
 
@@ -1472,15 +1545,14 @@ void handleInput(unsigned char key, int x, int y)
 	}
 }
 
+
 int main(int argc, char** argv)
 {
 	currentScene = &drawMenu;
 	curl_global_init(CURL_GLOBAL_ALL);
 	if (rememberUser())
 		currentMenuPhase = 2;
-	/*playerScores[100] = "Player 1";
-	playerScores[900] = "Player 2";
-	playerScores[80] = "Player 3";*/
+	PlayMenuSong();
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
 	glutInitWindowSize(800, 600);
