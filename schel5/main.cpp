@@ -188,7 +188,6 @@ void RenderString(float x, float y, void* font, const unsigned char* string)
 void startgame(void)
 {
 	if (vieti > 0) {
-
 		if (i < -380)
 		{
 			i = 0;
@@ -201,12 +200,16 @@ void startgame(void)
 		if (height == j) {
 
 			if (loc_vert > -100 && loc_vert < -50) {
-				if (currentProp == 1)
+				if (currentProp == 2)
+					vieti--;
+				else if (currentProp == 1) {
 					score += 200;
-				else
+				}
+				else {
 					score += 100;
+				}
 				height = vecpos[rand() % 3];
-				currentProp = rand() % 2 == 1 ? 1 : 0;
+				currentProp = rand() % 3;
 				difModifier = currentProp == 1 ? 2 : 1;
 				loc_vert = 420;
 				timp += SPEED_INCREASE_PER_GRAPE;
@@ -214,14 +217,15 @@ void startgame(void)
 		}
 
 		if (loc_vert <= -100) {
-			vieti--;
+			if (currentProp != 2) {
+				vieti--;
+			}
 			loc_vert = 420;
 			height = vecpos[rand() % 3];
-			currentProp = rand() % 2 == 1 ? 1 : 0;
+			currentProp = rand() % 3;
 			difModifier = currentProp == 1 ? 2 : 1;
 			timp += SPEED_INCREASE_PER_GRAPE;
 		}
-
 	}
 	else {
 		if (ok == 1) {
@@ -651,8 +655,15 @@ void drawScene(void)
 		deseneazaStrugure(1.0, 0.95, 0.0);
 		glPopMatrix();
 	}
+	//desenam strugure bomba
+	else if (currentProp == 2) {
+		glPushMatrix();
+		glTranslatef(height, loc_vert, 0.0);
+		deseneazaStrugure(1.0, 0.0, 0.0);
+		glPopMatrix();
+	}
 
-	// Calculeaza factorul de scalare cu ajutorul functiei sinusoidale
+	// factor de scalare cu ajutorul functiei sinu
 	scale_factor = 1.0f + sin(glutGet(GLUT_ELAPSED_TIME) * pulse_speed) * 0.01f;
 
 	glPushMatrix();
