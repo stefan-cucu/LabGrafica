@@ -16,6 +16,8 @@
 #define K 0.0174532
 #define M_PI 3.1415926
 
+
+#define SPEED_INCREASE_PER_GRAPE 0.01 // cu cat cad mai repede strugurii cand se colecteaza unul
 using namespace std;
 
 typedef pair<float, float> point;
@@ -32,10 +34,11 @@ double loc_vert = 420; // loc_vert e de fapt loc_oriz, adica punctul pe orizonta
 int vecpos[3] = { 0, 200, 400 };
 double height = vecpos[rand() % 3]; // height va fi de fapt pozitia pe orizontala a cosului care prinde struguri
 int score = 0;
-double timp = 0.1;
+double timp = 0.1, difModifier = 1;
 int pct = 1000;
 double rsj, rdj, rss, rds = 0;
 int vieti = 3;
+int currentProp = 0;
 map<int, string, greater<int>> playerScores;
 int window_width = 800, window_height = 600;
 void (*currentScene)(void);
@@ -188,16 +191,22 @@ void startgame(void)
 			i = 0;
 		}
 		i = i - 2 * timp;
-		loc_vert -= timp;
+		loc_vert -= timp * difModifier;
 
 
 		//daca cosul e pe aceeasi coloana cu strugurele si in intervalul ..., atunci creste scorul
 		if (height == j) {
 
 			if (loc_vert > -100 && loc_vert < -50) {
-				score += 100;
+				if (currentProp == 1)
+					score += 200;
+				else
+					score += 100;
 				height = vecpos[rand() % 3];
+				currentProp = rand() % 2 == 1 ? 1 : 0;
+				difModifier = currentProp == 1 ? 2 : 1;
 				loc_vert = 420;
+				timp += SPEED_INCREASE_PER_GRAPE;
 			}
 		}
 
@@ -205,6 +214,9 @@ void startgame(void)
 			vieti--;
 			loc_vert = 420;
 			height = vecpos[rand() % 3];
+			currentProp = rand() % 2 == 1 ? 1 : 0;
+			difModifier = currentProp == 1 ? 2 : 1;
+			timp += SPEED_INCREASE_PER_GRAPE;
 		}
 
 	}
@@ -217,7 +229,7 @@ void startgame(void)
 	}
 }
 
-void deseneazaStrugure() {
+void deseneazaStrugure(float r, float g, float b) {
 
 	// ramura
 	glColor3f(0.56, 0.34, 0.21);
@@ -231,9 +243,9 @@ void deseneazaStrugure() {
 	glEnd();
 
 	// boabele
-	glColor3f(0.22, 0.07, 0.35); // mov inchis
-	glColor3f(0.51, 0.12, 0.63); // mov mai deschis decat cel de sus
-
+	//glColor3f(0.22, 0.07, 0.35); // mov inchis
+	//glColor3f(0.51, 0.12, 0.63); // mov mai deschis decat cel de sus
+	glColor3f(r, g, b);
 	/*DrawCircle(-15, 15, 7, 100);
 	DrawCircle(-5, 15, 7, 100);
 	DrawCircle(5, 15, 7, 100);
@@ -556,6 +568,7 @@ void deseneaza_butoi() {
 // ---------------------------------------------------------
 }
 
+
 void drawScene(void)
 {
 	glClearColor(0.87, 0.8, 0.73, 0.0);
@@ -622,10 +635,19 @@ void drawScene(void)
 	}
 
 	//desenam strugurele
-	glPushMatrix();
+	if (currentProp == 0) {
+		glPushMatrix();
 		glTranslatef(height, loc_vert, 0.0);
-		deseneazaStrugure();
-	glPopMatrix();
+		deseneazaStrugure(0.51, 0.12, 0.63);
+		glPopMatrix();
+	}
+	//desenam golden strugure
+	else if (currentProp == 1) {
+		glPushMatrix();
+		glTranslatef(height, loc_vert, 0.0);
+		deseneazaStrugure(1.0, 0.95, 0.0);
+		glPopMatrix();
+	}
 
 	deseneazaInimi();
 
