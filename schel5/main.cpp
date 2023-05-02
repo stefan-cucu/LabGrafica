@@ -35,7 +35,7 @@ double j = 0.0;
 double i = 0.0;
 double contor = 0;
 double loc_vert = 420; // loc_vert e de fapt loc_oriz, adica punctul pe orizontala unde pleaca toti strugurii
-int vecpos[3] = { 0, 200, 400 };
+int vecpos[3] = {-7, 179, 365};
 double height = vecpos[rand() % 3]; // height va fi de fapt pozitia pe orizontala a cosului care prinde struguri
 int score = 0;
 double timp = 0.1, difModifier = 1;
@@ -110,7 +110,7 @@ void genereaza_pct_arc_elipsa(float a, float b, float start_angle, float end_ang
 	float dtheta = K; // o unitate dintr-un radian
 	float x = a * cosf(theta);
 	float y = b * sinf(theta);
-	
+
 	while (theta <= end_angle * K) {
 		mat[l_curr][nr].x = x;
 		mat[l_curr][nr].y = y;
@@ -328,54 +328,72 @@ void startgame(void)
 void deseneazaStrugure(float r, float g, float b) {
 
 	// ramura
-	glColor3f(0.56, 0.34, 0.21);
-	glRecti(-3, 35, 3, 15);
-	//DrawCircle(0, 35, 3, 10);
+	glColor3f(0, 0, 0);
+	glEnable(GL_POINT_SMOOTH);
+	glPointSize(8.0);
+	glBegin(GL_POINTS);
+	glVertex2f(0, 35);
+	glEnd();
 
+	glColor3f(0.431, 0.271, 0.129);
 	glEnable(GL_POINT_SMOOTH);
 	glPointSize(6.0);
 	glBegin(GL_POINTS);
 	glVertex2f(0, 35);
 	glEnd();
 
+	glColor3f(0, 0, 0);
+	glRecti(-4, 35, 4, 15);
+
+	glColor3f(0.431, 0.271, 0.129);
+	glRecti(-3, 35, 3, 15);
+
 	// boabele
-	//glColor3f(0.22, 0.07, 0.35); // mov inchis
-	//glColor3f(0.51, 0.12, 0.63); // mov mai deschis decat cel de sus
+	glColor3f(0, 0, 0);
+
+	glEnable(GL_POINT_SMOOTH);
+	glPointSize(14.0);
+	glBegin(GL_POINTS);
+		glVertex2f(-15, 15);
+		glVertex2f(-5, 15);
+		glVertex2f(5, 15);
+		glVertex2f(15, 15);
+
+		glVertex2f(-10, 5);
+		glVertex2f(0, 5);
+		glVertex2f(10, 5);
+
+		glVertex2f(-5, -5);
+		glVertex2f(5, -5);
+
+		glVertex2f(0, -15);
+	glEnd();
+
+
 	glColor3f(r, g, b);
-	/*DrawCircle(-15, 15, 7, 100);
-	DrawCircle(-5, 15, 7, 100);
-	DrawCircle(5, 15, 7, 100);
-	DrawCircle(15, 15, 7, 100);
-
-	DrawCircle(-10, 5, 7, 100);
-	DrawCircle(0, 5, 7, 100);
-	DrawCircle(10, 5, 7, 100);
-
-	DrawCircle(-5, -5, 7, 100);
-	DrawCircle(5, -5, 7, 100);
-
-	DrawCircle(0, -15, 7, 100);*/
 
 	glEnable(GL_POINT_SMOOTH);
 	glPointSize(12.0);
 	glBegin(GL_POINTS);
-	glVertex2f(-15, 15);
-	glVertex2f(-5, 15);
-	glVertex2f(5, 15);
-	glVertex2f(15, 15);
+		glVertex2f(-15, 15);
+		glVertex2f(-5, 15);
+		glVertex2f(5, 15);
+		glVertex2f(15, 15);
 
-	glVertex2f(-10, 5);
-	glVertex2f(0, 5);
-	glVertex2f(10, 5);
+		glVertex2f(-10, 5);
+		glVertex2f(0, 5);
+		glVertex2f(10, 5);
 
-	glVertex2f(-5, -5);
-	glVertex2f(5, -5);
+		glVertex2f(-5, -5);
+		glVertex2f(5, -5);
 
-	glVertex2f(0, -15);
+		glVertex2f(0, -15);
 	glEnd();
 
 	// frunza
-	glColor3f(0.2, 0.67, 0.13);
+	glColor3f(0, 0, 0);
+	DrawElipse(12, 21, 13, 6, 100);
+	glColor3f(0.349, 0.365, 0.282);
 	DrawElipse(12, 21, 12, 5, 100);
 }
 
@@ -387,7 +405,7 @@ void deseneazaInimi(float scale_factor) {
 
 	RenderString(530.0f, 400.0f, GLUT_BITMAP_9_BY_15, (const unsigned char*)str);
 
-	glColor3f(0.78, 0.16, 0.15);
+	glColor3f(0.58, 0.11, 0.09);
 
 	int x_st = 520, y_st = 350, dist = 50;
 
@@ -409,25 +427,33 @@ void deseneazaInimi(float scale_factor) {
 		glEnable(GL_POINT_SMOOTH);
 		glPointSize(20.0);
 		glBegin(GL_POINTS);
-			glVertex2f(-10 + x_st + i * dist, 0 + y_st);
-			glVertex2f(10 + x_st + i * dist, 0 + y_st);
+		glVertex2f(-10 + x_st + i * dist, 0 + y_st);
+		glVertex2f(10 + x_st + i * dist, 0 + y_st);
 		glEnd();
 
 		glBegin(GL_TRIANGLES);
-			glVertex2f(-20 + x_st + i * dist, -3 + y_st);
-			glVertex2f(20 + x_st + i * dist, -3 + y_st);
-			glVertex2f(0 + x_st + i * dist, -30 + y_st);
+		glVertex2f(-20 + x_st + i * dist, -3 + y_st);
+		glVertex2f(20 + x_st + i * dist, -3 + y_st);
+		glVertex2f(0 + x_st + i * dist, -30 + y_st);
 		glEnd();
 	}
 }
 
 void deseneazaLada() {
 
-	glColor3f(0.71, 0.28, 0.0);
+	glColor3f(0, 0, 0); // contur manere
+	glRecti(-46, -16, -34, 31);
+	glRecti(34, -14, 46, 31);
+
+	glColor3f(0.525, 0.306, 0.114); // manere
 	glRecti(-45, -15, -35, 30);
 	glRecti(35, -15, 45, 30);
 
-	glColor3f(0.8, 0.48, 0.13);
+	glColor3f(0, 0, 0); // contur
+	glRecti(-46, -16, 46, 1);
+	glRecti(-46, 4, 46, 21);
+
+	glColor3f(0.737, 0.463, 0.22);
 	glRecti(-45, -15, 45, 0);
 	glRecti(-45, 5, 45, 20);
 
@@ -438,9 +464,9 @@ void deseneaza_butoi() {
 	glColor3f(0.552, 0.321, 0.121);
 	glLineWidth(2.0);
 
-// generare varfuri pentru fiecare arc ce compune butoiul
-// ---------------------------------------------------------
-	//1. arc elipsa stanga
+	// generare varfuri pentru fiecare arc ce compune butoiul
+	// ---------------------------------------------------------
+		//1. arc elipsa stanga
 	genereaza_pct_arc_elipsa(20, 95, 90, 270);
 	//2. arc elipsa dreapta
 	genereaza_pct_arc_elipsa(20, 95, 270, 450);
@@ -452,21 +478,21 @@ void deseneaza_butoi() {
 	genereaza_pct_arc_elipsa(8, 95, 270, 450);
 	//6. interior 4
 	genereaza_pct_arc_elipsa(16, 95, 270, 450);
-// ---------------------------------------------------------
-	
-// forma butoi
-// ---------------------------------------------------------
-	// linie jos + arc stanga
+	// ---------------------------------------------------------
+
+	// forma butoi
+	// ---------------------------------------------------------
+		// linie jos + arc stanga
 	glPushMatrix();
 	glTranslatef(490, 10, 0.0);
 	glBegin(GL_POLYGON);
-		// linie jos
-		glVertex2f(0, -95);
-		glVertex2f(180, -95);
+	// linie jos
+	glVertex2f(0, -95);
+	glVertex2f(180, -95);
 
-		for (int i = 0; i < c; i++) {
-			glVertex2f(mat[0][i].x, mat[0][i].y);
-		}
+	for (int i = 0; i < c; i++) {
+		glVertex2f(mat[0][i].x, mat[0][i].y);
+	}
 	glEnd();
 	glPopMatrix();
 
@@ -474,42 +500,42 @@ void deseneaza_butoi() {
 	glPushMatrix();
 	glTranslatef(670, 10, 0.0);
 	glBegin(GL_POLYGON);
-		// linie sus
-		glVertex2f(0, 95);
-		glVertex2f(-180, 95);
+	// linie sus
+	glVertex2f(0, 95);
+	glVertex2f(-180, 95);
 
-		for (int i = 0; i < c; i++) {
-			glVertex2f(mat[1][i].x, mat[1][i].y);
-		}
+	for (int i = 0; i < c; i++) {
+		glVertex2f(mat[1][i].x, mat[1][i].y);
+	}
 	glEnd();
 	glPopMatrix();
 
-// contur butoi exterior
-// ---------------------------------------------------------
+	// contur butoi exterior
+	// ---------------------------------------------------------
 	glColor3f(0.0, 0.0, 0.0);
 	glBegin(GL_LINES);
-		glVertex2f(490, -85); // 180 dif de 36
-		glVertex2f(670, -85);
+	glVertex2f(490, -85); // 180 dif de 36
+	glVertex2f(670, -85);
 
-		glVertex2f(490, 105);
-		glVertex2f(670, 105);
+	glVertex2f(490, 105);
+	glVertex2f(670, 105);
 	glEnd();
 
 	glBegin(GL_LINE_STRIP);
-		for (int i = 0; i < c; i++) {
-			glVertex2f(490 + mat[0][i].x, 10 + mat[0][i].y);
-		}
+	for (int i = 0; i < c; i++) {
+		glVertex2f(490 + mat[0][i].x, 10 + mat[0][i].y);
+	}
 	glEnd();
 
 	glBegin(GL_LINE_STRIP);
-		for (int i = 0; i < c; i++) {
-			glVertex2f(670 + mat[1][i].x, 10 + mat[1][i].y);
-		}
+	for (int i = 0; i < c; i++) {
+		glVertex2f(670 + mat[1][i].x, 10 + mat[1][i].y);
+	}
 	glEnd();
-// ---------------------------------------------------------
+	// ---------------------------------------------------------
 
-// culori intermediare
-// ---------------------------------------------------------
+	// culori intermediare
+	// ---------------------------------------------------------
 	glColor3f(0.682, 0.427, 0.203);
 	glBegin(GL_POLYGON);
 	for (int i = 0; i < c; i++) {
@@ -524,124 +550,124 @@ void deseneaza_butoi() {
 		glVertex2f(598 + mat[4][i].x, 10 + mat[4][i].y);
 	}
 	glEnd();
-// ---------------------------------------------------------
-	
+	// ---------------------------------------------------------
 
-// arce interioare butoi
-// ---------------------------------------------------------
+
+	// arce interioare butoi
+	// ---------------------------------------------------------
 	glColor3f(0.0, 0.0, 0.0);
-// interior 1
+	// interior 1
 	glPushMatrix();
 	glTranslatef(526, 10, 0.0);
 	glBegin(GL_LINE_STRIP);
-		for (int i = 0; i < c; i++) {
-			glVertex2f(mat[2][i].x, mat[2][i].y);
-		}
+	for (int i = 0; i < c; i++) {
+		glVertex2f(mat[2][i].x, mat[2][i].y);
+	}
 	glEnd();
 	glPopMatrix();
 
-// interior 2
+	// interior 2
 	glPushMatrix();
 	glTranslatef(562, 10, 0.0);
 	glBegin(GL_LINE_STRIP);
-		for (int i = 0; i < c; i++) {
-			glVertex2f(mat[3][i].x, mat[3][i].y);
-		}
+	for (int i = 0; i < c; i++) {
+		glVertex2f(mat[3][i].x, mat[3][i].y);
+	}
 	glEnd();
 	glPopMatrix();
 
-// interior 3
+	// interior 3
 	glPushMatrix();
 	glTranslatef(598, 10, 0.0);
 	glBegin(GL_LINE_STRIP);
-		for (int i = 0; i < c; i++) {
-			glVertex2f(mat[4][i].x, mat[4][i].y);
-		}
+	for (int i = 0; i < c; i++) {
+		glVertex2f(mat[4][i].x, mat[4][i].y);
+	}
 	glEnd();
 	glPopMatrix();
 
-// interior 4
+	// interior 4
 	glPushMatrix();
 	glTranslatef(634, 10, 0.0);
 	glBegin(GL_LINE_STRIP);
-		for (int i = 0; i < c; i++) {
-			glVertex2f(mat[5][i].x, mat[5][i].y);
-		}
-		glEnd();
+	for (int i = 0; i < c; i++) {
+		glVertex2f(mat[5][i].x, mat[5][i].y);
+	}
+	glEnd();
 	glPopMatrix();
-// ---------------------------------------------------------
+	// ---------------------------------------------------------
 
 
-// bare butoi
-// ---------------------------------------------------------
+	// bare butoi
+	// ---------------------------------------------------------
 	Point2D* v, * p;
 	int nr = 0;
 	glColor3f(0.5, 0.5, 0.5);
 	glBegin(GL_POLYGON);
-		nr = vector_puncte(v, 0, 475.0, 472.0, 490.0, 1);
-		for (int i = 0; i < nr; i++)
-			if (v[i].y >= 0)
-				glVertex2f(490 + v[i].x, 10 + v[i].y);
-		
-		nr = vector_puncte(p, 1, 688.0, 685.0, 670.0, 0);
-		for (int i = 0; i < nr; i++)
-			if (p[i].y >= 0)
-				glVertex2f(670 + p[i].x, 10 + p[i].y);
-		delete[] v;
-		delete[] p;
+	nr = vector_puncte(v, 0, 475.0, 472.0, 490.0, 1);
+	for (int i = 0; i < nr; i++)
+		if (v[i].y >= 0)
+			glVertex2f(490 + v[i].x, 10 + v[i].y);
+
+	nr = vector_puncte(p, 1, 688.0, 685.0, 670.0, 0);
+	for (int i = 0; i < nr; i++)
+		if (p[i].y >= 0)
+			glVertex2f(670 + p[i].x, 10 + p[i].y);
+	delete[] v;
+	delete[] p;
 	glEnd();
 
 	glColor3f(0.0, 0.0, 0.0);
 	glBegin(GL_LINES);
-		glVertex2f(475.0, 71.0);
-		glVertex2f(685.0, 71.0);
+	glVertex2f(475.0, 71.0);
+	glVertex2f(685.0, 71.0);
 
-		glVertex2f(472.0, 52.0);
-		glVertex2f(688.0, 52.0);
+	glVertex2f(472.0, 52.0);
+	glVertex2f(688.0, 52.0);
 	glEnd();
 
 	glColor3f(0.5, 0.5, 0.5);
 	glBegin(GL_POLYGON);
-		nr = vector_puncte(v, 0, 475.0, 472.0, 490.0, 1);
-		for (int i = 0; i < nr; i++)
-			if (v[i].y <= 0)
-				glVertex2f(490 + v[i].x, 10 + v[i].y);
+	nr = vector_puncte(v, 0, 475.0, 472.0, 490.0, 1);
+	for (int i = 0; i < nr; i++)
+		if (v[i].y <= 0)
+			glVertex2f(490 + v[i].x, 10 + v[i].y);
 
-		nr = vector_puncte(p, 1, 688.0, 685.0, 670.0, 0);
-		for (int i = 0; i < nr; i++)
-			if (p[i].y <= 0)
-				glVertex2f(670 + p[i].x, 10 + p[i].y);
-		delete[] v;
-		delete[] p;
+	nr = vector_puncte(p, 1, 688.0, 685.0, 670.0, 0);
+	for (int i = 0; i < nr; i++)
+		if (p[i].y <= 0)
+			glVertex2f(670 + p[i].x, 10 + p[i].y);
+	delete[] v;
+	delete[] p;
 	glEnd();
-	
+
 
 	glColor3f(0.0, 0.0, 0.0);
 	glBegin(GL_LINES);
-		glVertex2f(475.0, -51.0);
-		glVertex2f(685.0, -51.0);
+	glVertex2f(475.0, -51.0);
+	glVertex2f(685.0, -51.0);
 
-		glVertex2f(472.0, -31.0);
-		glVertex2f(688.0, -31.0);
+	glVertex2f(472.0, -31.0);
+	glVertex2f(688.0, -31.0);
 	glEnd();
 
-// "suruburi" butoi
-// ---------------------------------------------------------
+	// "suruburi" butoi
+	// ---------------------------------------------------------
 	glColor3f(0.0, 0.0, 0.0);
 	glPointSize(11.0);
 	glEnable(GL_POINT_SMOOTH);
 	glBegin(GL_POINTS);
-		glVertex2f(491, 62);
-		glVertex2f(532, 62);
-		glVertex2f(578, 62);
-		glVertex2f(625, 62);
-		glVertex2f(667, 62);
+	glVertex2f(491, 62);
+	glVertex2f(532, 62);
+	glVertex2f(578, 62);
+	glVertex2f(625, 62);
+	glVertex2f(667, 62);
 
-		glVertex2f(491, -41);
-		glVertex2f(532, -41);
-		glVertex2f(578, -41);
-		glVertex2f(625, -41);
-		glVertex2f(667, -41);
+	glVertex2f(491, -41);
+	glVertex2f(532, -41);
+	glVertex2f(578, -41);
+	glVertex2f(625, -41);
+	glVertex2f(667, -41);
 	glEnd();
 
 
@@ -649,53 +675,108 @@ void deseneaza_butoi() {
 	glPointSize(7.0);
 	glEnable(GL_POINT_SMOOTH);
 	glBegin(GL_POINTS);
-		glVertex2f(491, 62);
-		glVertex2f(532, 62);
-		glVertex2f(578, 62);
-		glVertex2f(625, 62);
-		glVertex2f(667, 62);
+	glVertex2f(491, 62);
+	glVertex2f(532, 62);
+	glVertex2f(578, 62);
+	glVertex2f(625, 62);
+	glVertex2f(667, 62);
 
-		glVertex2f(491, -41);
-		glVertex2f(532, -41);
-		glVertex2f(578, -41);
-		glVertex2f(625, -41);
-		glVertex2f(667, -41);
+	glVertex2f(491, -41);
+	glVertex2f(532, -41);
+	glVertex2f(578, -41);
+	glVertex2f(625, -41);
+	glVertex2f(667, -41);
 	glEnd();
-// ---------------------------------------------------------
+	// ---------------------------------------------------------
 }
 
-
-void drawScene(void)
-{
-	glClearColor(0.87, 0.8, 0.73, 0.0);
+void deseneazaFundal() {
+	glClearColor(0.20, 0.09, 0.11, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT);
-	
-	glColor3f(0.78, 0.69, 0.65);
-	glBegin(GL_POLYGON);
-		glVertex2i(460, -140);// Stanga jos
-		glVertex2i(700, -140); // Dreapta jos
-		glVertex2i(700, 460);  // Dreapta sus
-		glVertex2i(460, 460); // Stanga sus
-	glEnd();
+
+	// lumini pe coloane
+	for (int i = 0; i < 3; i++) {
+		glColor3f(0.329, 0.153, 0.184);
+		//glColor3f(0.494, 0.227, 0.278);
+
+		glBegin(GL_TRIANGLES);
+		glVertex2f(vecpos[i], 520);
+		glVertex2f(vecpos[i] - 100, -50);
+		glVertex2f(vecpos[i] + 100, -50);
+		glEnd();
+
+		glColor3f(0.965, 0.827, 0.635);
+		DrawElipse(vecpos[i], 450, 15, 7, 20);
+
+	}
+	glColor3f(0.329, 0.153, 0.184);
+	//glColor3f(0.494, 0.227, 0.278);
+
+	glRectf(-100, -50, 500, -140);
+
+	glColor3f(0.788, 0.561, 0.349);
+	glRectf(458, -160, 700, 460); // dreapta
+}
+
+void deseneazaStruguriPesteButoi() {
+
+	int nrRanduri = (score / 100) / 5 + 1;
+	int nrColoane = (score / 100) % 5;
+	int jmax, rmax = min(nrRanduri, 6);
+
+
+	for (int r = 0; r < rmax; r++) {
+		if (r == (nrRanduri - 1)) jmax = nrColoane;
+		else jmax = 5;
+		
+		for(int c = 0; c < jmax; c ++)
+		{
+			glPushMatrix();
+			glTranslatef(505 + 40 * c, 110 + 30 * r, 0);
+			glRotatef(50.0f, 0.0f, 0.0f, 1.0f);
+			deseneazaStrugure(0.431, 0.208, 0.396);
+			glPopMatrix();
+		}
+	}
 
 	deseneaza_butoi();
 
+	// numarul de struguri ramasi
+	int stRamasi = min(max(((score / 100) - 30), 0), 7);
+	// strugurii ramasi ii pun pe doua coloane de maxim 3 struguri
+	for (int c = 0; c < stRamasi; c++)
+	{
+		glPushMatrix();
+		glTranslatef(495 + 30 * c, -100, 0);
+		glRotatef(50.0f, 0.0f, 0.0f, 1.0f);
+		deseneazaStrugure(0.431, 0.208, 0.396);
+		glPopMatrix();
+	}
+	
+}
+
+void drawScene(void)
+{
+	deseneazaFundal();
+
+	deseneazaStruguriPesteButoi();
+
 	//desenam cosul/butoiul/lada
 	glPushMatrix();
-		glTranslatef(j, -100.0, 0.0);
-		deseneazaLada();
-		if (ok == 0)
-		{
-			rsj = 8;
-			rss = -8;
-			rdj = -8;
-			rds = 8;
-		}
+	glTranslatef(j, -100.0, 0.0);
+	deseneazaLada();
+	if (ok == 0)
+	{
+		rsj = 8;
+		rss = -8;
+		rdj = -8;
+		rds = 8;
+	}
 	glPopMatrix();
 	
-	if (contor == 1 && (j != 200 && j != 400))
+	if (contor == 1 && (j != 179 && j != 365))
 		j = j + 1;
-	else if (contor == -1 && (j != 200 && j != 0))
+	else if (contor == -1 && (j != 179 && j != -7))
 		j = j - 1;
 	else {
 		contor = 0;
@@ -705,21 +786,21 @@ void drawScene(void)
 	if (currentProp == 0) {
 		glPushMatrix();
 		glTranslatef(height, loc_vert, 0.0);
-		deseneazaStrugure(0.51, 0.12, 0.63);
+		deseneazaStrugure(0.431, 0.208, 0.396);
 		glPopMatrix();
 	}
 	//desenam golden strugure
 	else if (currentProp == 1) {
 		glPushMatrix();
 		glTranslatef(height, loc_vert, 0.0);
-		deseneazaStrugure(1.0, 0.95, 0.0);
+		deseneazaStrugure(0.647, 0.486, 0);
 		glPopMatrix();
 	}
 	//desenam strugure bomba
 	else if (currentProp == 2) {
 		glPushMatrix();
 		glTranslatef(height, loc_vert, 0.0);
-		deseneazaStrugure(1.0, 0.0, 0.0);
+		deseneazaStrugure(0.58, 0.11, 0.09);
 		glPopMatrix();
 	}
 
@@ -730,14 +811,6 @@ void drawScene(void)
 		deseneazaInimi(scale_factor);
 	glPopMatrix();
 	
-	glColor3f(0.78, 0.69, 0.65);
-	glBegin(GL_POLYGON);
-		glVertex2i(-100, 420);// Stanga jos
-		glVertex2i(700, 420); // Dreapta jos
-		glVertex2i(700, 460); // Dreapta sus
-		glVertex2i(-100, 460);// Stanga sus
-	glEnd();
-	RenderString(200.0f, 432.0f, GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*)"Prinde strugurii!");
 
 	if (ok == 0) {
 		glEnable(GL_BLEND);
@@ -806,9 +879,9 @@ void DrawRays(float cx, float cy, float r, float offset, int num_rays)
 		const float ay = cy + (r + offset) * sin(theta);
 		//cout << i << " -- " << theta << endl;
 
-	
-	glVertex2f(x, y); // starting point
-	glVertex2f(ax, ay); // endpoint
+
+		glVertex2f(x, y); // starting point
+		glVertex2f(ax, ay); // endpoint
 	}
 	glEnd();
 }
@@ -829,27 +902,27 @@ void DrawBezier(point m, point n, point p, int num_segments)
 void DrawBottle(int i, int j)
 {
 	glColor3f(0.77, 0.18, 0.11);
-	glRectf(i, j, i + 20, j+85);
+	glRectf(i, j, i + 20, j + 85);
 	glBegin(GL_TRIANGLES);
-	glVertex2f(i, j+85);
-	glVertex2f(i + 20, j+85);
-	glVertex2f(i + 4, j+105);
+	glVertex2f(i, j + 85);
+	glVertex2f(i + 20, j + 85);
+	glVertex2f(i + 4, j + 105);
 
-	glVertex2f(i + 10, j+85);
-	glVertex2f(i + 4, j+105);
-	glVertex2f(i + 16, j+105);
+	glVertex2f(i + 10, j + 85);
+	glVertex2f(i + 4, j + 105);
+	glVertex2f(i + 16, j + 105);
 
-	glVertex2f(i + 10, j+85);
-	glVertex2f(i + 16, j+105);
-	glVertex2f(i + 20, j+85);
+	glVertex2f(i + 10, j + 85);
+	glVertex2f(i + 16, j + 105);
+	glVertex2f(i + 20, j + 85);
 	glEnd();
-	glRectf(i + 4, j+105, i + 16, j+108);
+	glRectf(i + 4, j + 105, i + 16, j + 108);
 
 	glColor3f(0.58, 0.11, 0.09);
-	glRectf(i + 4, j+108, i + 16, j+115);
+	glRectf(i + 4, j + 108, i + 16, j + 115);
 
 	glColor3f(0.88, 0.55, 0.35);
-	glRectf(i + 1.5, j+60, i + 18.5, j + 75);
+	glRectf(i + 1.5, j + 60, i + 18.5, j + 75);
 }
 
 
@@ -871,7 +944,7 @@ void drawMenu(void)
 	glRectf(-1000, -70, 1000, -80);
 	glRectf(-1000, -60, 1000, -55);
 
-	
+
 
 	glColor3f(0.88, 0.48, 0.20);
 	glRectf(-100, 1000, -70, -55);
@@ -879,9 +952,9 @@ void drawMenu(void)
 	glRectf(670, 1000, 700, -55);
 	glRectf(285, 1000, 315, -55);
 
-	
+
 	int i = -70, j = 315;
-	
+
 	for (int j = 315; j >= -100; j -= 185)
 	{
 		int i = -70;
@@ -896,9 +969,9 @@ void drawMenu(void)
 		glColor3f(0.29, 0.15, 0.15);
 
 		glBegin(GL_TRIANGLE_STRIP);
-		glVertex2f(i+360, j);
+		glVertex2f(i + 360, j);
 		glVertex2f(i + 350, j + 10);
-		glVertex2f(i+360, j + 200);
+		glVertex2f(i + 360, j + 200);
 		glVertex2f(i + 350, j + 200);
 		glEnd();
 
@@ -910,7 +983,7 @@ void drawMenu(void)
 		glEnd();
 
 		for (int i = -40; i <= 270; i += 35) {
-			DrawBottle(i, j+4);
+			DrawBottle(i, j + 4);
 
 		}
 	}
@@ -933,7 +1006,7 @@ void drawMenu(void)
 		glVertex2f(i + 360, j + 200);
 		glVertex2f(i + 350, j + 200);
 		glEnd();
-		
+
 		glBegin(GL_TRIANGLE_STRIP);
 		glVertex2f(i, j);
 		glVertex2f(i + 10, j + 10);
@@ -942,7 +1015,7 @@ void drawMenu(void)
 		glEnd();
 
 		for (int i = 345; i <= 640; i += 35) {
-			DrawBottle(i, j+4);
+			DrawBottle(i, j + 4);
 
 		}
 	}
@@ -953,8 +1026,8 @@ void drawMenu(void)
 
 	menuBarrel();
 
-	RenderString(180.0f, 280.0f, GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*)"<NUMELE JOCULUI>");
-	
+	RenderString(225.0f, 280.0f, GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*)"LA BUTOAIE");
+
 	if (currentMenuPhase == 0 || currentMenuPhase == 1) {
 		// Draw login form
 
@@ -1040,21 +1113,21 @@ void drawMenu(void)
 		glLineWidth(2.0f);
 		RenderString(180.0f, 250.0f, GLUT_BITMAP_HELVETICA_18, (const unsigned char*)("Hello, " + username + "!").c_str());
 
-		RenderString(240.0f, 200.0f, GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*) "Start game");
+		RenderString(240.0f, 200.0f, GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*)"Start game");
 		if (currentMenuHoverBtn == 1) {
 			glBegin(GL_LINES);
 			glVertex2f(240, 190);
 			glVertex2f(345, 190);
 			glEnd();
 		}
-		RenderString(250.0f, 150.0f, GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*) "Sign out");
+		RenderString(250.0f, 150.0f, GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*)"Sign out");
 		if (currentMenuHoverBtn == 2) {
 			glBegin(GL_LINES);
 			glVertex2f(250, 140);
 			glVertex2f(330, 140);
 			glEnd();
 		}
-		RenderString(270.0f, 100.0f, GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*) "Exit");
+		RenderString(270.0f, 100.0f, GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*)"Exit");
 		if (currentMenuHoverBtn == 3) {
 			glBegin(GL_LINES);
 			glVertex2f(270, 90);
@@ -1066,7 +1139,7 @@ void drawMenu(void)
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		glColor4f(0.0, 0.0, 0.0, 0.4); 
+		glColor4f(0.0, 0.0, 0.0, 0.4);
 		glRectf(-200, -200, 1000, 1000);
 
 		glColor3f(0, 0, 0);
@@ -1090,7 +1163,7 @@ string extractMessage(const string& jsonString) {
 	size_t messageStart = jsonString.find("\"message\"");
 
 	if (messageStart != string::npos) {
-		size_t valueStart = jsonString.find("\"", messageStart + 9); 
+		size_t valueStart = jsonString.find("\"", messageStart + 9);
 		size_t valueEnd = jsonString.find("\"", valueStart + 1);
 
 		if (valueStart != string::npos && valueEnd != string::npos) {
@@ -1209,7 +1282,7 @@ bool loginRequest()
 				ok = true;
 			}
 		}
-		
+
 		curl_global_cleanup();
 	}
 	return ok;
@@ -1222,7 +1295,7 @@ bool signupRequest()
 	bool ok = true;
 	if (curl) {
 		string postData = "{\"username\":\"" + username + "\",\"password\":\"" + password + "\"}";
-		
+
 		curl_easy_setopt(curl, CURLOPT_URL, "https://grafica-backend.onrender.com/signup");
 		curl_easy_setopt(curl, CURLOPT_POST, 1L);
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postData.c_str());
@@ -1366,7 +1439,7 @@ void miscast(void)
 {
 	if (ok != 0)
 	{
-		if (j > 0)
+		if (j > -7)
 		{
 			contor = -1;
 			j -= 1;
@@ -1380,7 +1453,7 @@ void miscadr(void)
 {
 	if (ok != 0)
 	{
-		if (j < 400)
+		if (j < 365)
 		{
 			contor = 1;
 			j += 1;
