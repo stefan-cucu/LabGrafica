@@ -7,6 +7,7 @@
 #include <fstream>
 #include <cstdio>
 #include <vector>
+#include <map>
 
 #define PI 3.14159265359
 
@@ -31,7 +32,11 @@ int pct = 1000;
 double rsj, rdj, rss, rds = 0;
 int vieti = 3;
 map<int, string, greater<int>> playerScores;
+bool gotData = 0;
 void (*currentScene)(void);
+
+bool storeScoreRequest(int score);
+void getLeaderboardDataRequest();
 
 void init(void)
 {
@@ -124,7 +129,11 @@ void startgame(void)
 
 	}
 	else {
-		ok = 0;
+		if (ok == 1) {
+			ok = 0;
+			storeScoreRequest(score);
+			getLeaderboardDataRequest();
+		}
 	}
 
 }
@@ -241,6 +250,7 @@ void deseneazaLada() {
 
 void drawScene(void)
 {
+	glClearColor(0.87, 0.8, 0.73, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	
 	glColor3f(0.78, 0.69, 0.65);
@@ -901,7 +911,7 @@ bool storeScoreRequest(int score)
 	return ok;
 }
 
-vector<pair<int, string>> getLeaderboardDataRequest()
+void getLeaderboardDataRequest()
 {
 	CURL* curl = curl_easy_init();
 	vector<pair<int, string>> scores;
@@ -914,8 +924,10 @@ vector<pair<int, string>> getLeaderboardDataRequest()
 		CURLcode res = curl_easy_perform(curl);
 		cout << response << endl;
 		scores = parseScores(response);
+		for (const auto& score : scores) {
+			playerScores[score.first] = score.second;
+		}
 	}
-	return scores;
 }
 
 void saveUser()
@@ -1059,11 +1071,10 @@ void handleClick(int button, int state, int x, int y)
 			}
 			else if (x >= 250 && x <= 340 && 460 - y >= 140 && 460 - y <= 180)
 			{
-				/*currentMenuPhase = 0;
+				currentMenuPhase = 0;
 				username = "";
 				password = "";
-				remove("saved.txt");*/
-				getLeaderboardDataRequest();
+				remove("saved.txt");
 			}
 			else if (x >= 270 && x <= 320 && 460 - y >= 90 && 460 - y <= 130)
 			{
@@ -1131,9 +1142,9 @@ int main(int argc, char** argv)
 	curl_global_init(CURL_GLOBAL_ALL);
 	if (rememberUser())
 		currentMenuPhase = 2;
-	playerScores[100] = "Player 1";
+	/*playerScores[100] = "Player 1";
 	playerScores[900] = "Player 2";
-	playerScores[80] = "Player 3";
+	playerScores[80] = "Player 3";*/
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
 	glutInitWindowSize(800, 600);

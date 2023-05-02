@@ -78,9 +78,7 @@ def is_username_available(username):
 
 def store_user(username, password):
     with open(USER_FILE, 'a') as file:
-        file.write('\n')
-        writer = csv.writer(file)
-        writer.writerow([username, password])
+        file.write(f'\n{username},{password}')
 
 def save_score(username, score):
     scores = []
