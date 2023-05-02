@@ -2,6 +2,7 @@
 #include<windows.h>
 #include<string>
 #include <utility>
+#include<cmath>
 #include <GL/freeglut.h>
 #include <curl/curl.h>
 #include <fstream>
@@ -10,6 +11,10 @@
 #include <map>
 
 #define PI 3.14159265359
+
+// definesc pi/180 pentru calcule
+#define K 0.0174532
+#define M_PI 3.1415926
 
 using namespace std;
 
@@ -35,6 +40,16 @@ map<int, string, greater<int>> playerScores;
 int window_width = 800, window_height = 600;
 void (*currentScene)(void);
 
+int l = 6;
+int c = 181;
+int l_curr = -1;
+
+typedef struct {
+	float x, y;
+}Point2D;
+
+Point2D mat[6][181];
+
 bool storeScoreRequest(int score);
 void getLeaderboardDataRequest();
 
@@ -43,7 +58,72 @@ void init(void)
 	glClearColor(0.87, 0.8, 0.73, 0.0);
 	glMatrixMode(GL_PROJECTION);
 	glOrtho(left_m, right_m, bottom_m, top_m, -1.0, 1.0);
+	gluOrtho2D(left_m - 1000, right_m + 1000, bottom_m - 1000, top_m + 1000);
 }
+
+
+void genereaza_pct_arc_elipsa(float a, float b, float start_angle, float end_angle) {
+	int nr = 0;
+	l_curr++;
+	l_curr = l_curr % l;
+	float theta = start_angle * K;
+	float dtheta = K; // o unitate dintr-un radian
+	float x = a * cosf(theta);
+	float y = b * sinf(theta);
+	
+	while (theta <= end_angle * K) {
+		mat[l_curr][nr].x = x;
+		mat[l_curr][nr].y = y;
+		if (nr < c) {
+			nr++;
+		}
+		else {
+			break;
+		}
+		if (theta >= 360) {
+			theta = 0;
+		}
+		theta += dtheta;
+		x = a * cosf(theta);
+		y = b * sinf(theta);
+	}
+}
+
+int vector_puncte(Point2D*& v, int linie, float sup_x, float inf_x, float val, bool ok) {
+	int nr = 0;
+	if (ok == true) {
+		for (int i = 0; i < c; i++)
+			if (abs(mat[linie][i].x) <= abs(val - inf_x) && abs(mat[linie][i].x) >= abs(val - sup_x)) {
+				nr++;
+			}
+
+		if (nr > 0) {
+			v = new Point2D[nr];
+			int j = -1;
+			for (int i = 0; i < c; i++)
+				if (abs(mat[linie][i].x) <= abs(val - inf_x) && abs(mat[linie][i].x) >= abs(val - sup_x)) {
+					v[++j] = mat[linie][i];
+				}
+		}
+	}
+	else {
+		for (int i = 0; i < c; i++)
+			if (abs(mat[linie][i].x) >= abs(val - inf_x) && abs(mat[linie][i].x) <= abs(val - sup_x)) {
+				nr++;
+			}
+
+		if (nr > 0) {
+			v = new Point2D[nr];
+			int j = -1;
+			for (int i = 0; i < c; i++)
+				if (abs(mat[linie][i].x) >= abs(val - inf_x) && abs(mat[linie][i].x) <= abs(val - sup_x)) {
+					v[++j] = mat[linie][i];
+				}
+		}
+	}
+	return nr;
+}
+
 
 void DrawCircle(float cx, float cy, float r, int num_segments)
 {
@@ -135,7 +215,6 @@ void startgame(void)
 			getLeaderboardDataRequest();
 		}
 	}
-
 }
 
 void deseneazaStrugure() {
@@ -150,7 +229,6 @@ void deseneazaStrugure() {
 	glBegin(GL_POINTS);
 	glVertex2f(0, 35);
 	glEnd();
-
 
 	// boabele
 	glColor3f(0.22, 0.07, 0.35); // mov inchis
@@ -223,17 +301,16 @@ void deseneazaInimi() {
 		glEnable(GL_POINT_SMOOTH);
 		glPointSize(20.0);
 		glBegin(GL_POINTS);
-		glVertex2f(-10 + x_st + i * dist, 0 + y_st);
-		glVertex2f(10 + x_st + i * dist, 0 + y_st);
+			glVertex2f(-10 + x_st + i * dist, 0 + y_st);
+			glVertex2f(10 + x_st + i * dist, 0 + y_st);
 		glEnd();
 
 		glBegin(GL_TRIANGLES);
-		glVertex2f(-20 + x_st + i * dist, -3 + y_st);
-		glVertex2f(20 + x_st + i * dist, -3 + y_st);
-		glVertex2f(0 + x_st + i * dist, -30 + y_st);
+			glVertex2f(-20 + x_st + i * dist, -3 + y_st);
+			glVertex2f(20 + x_st + i * dist, -3 + y_st);
+			glVertex2f(0 + x_st + i * dist, -30 + y_st);
 		glEnd();
 	}
-
 }
 
 void deseneazaLada() {
@@ -248,6 +325,237 @@ void deseneazaLada() {
 
 }
 
+void deseneaza_butoi() {
+
+	glColor3f(0.552, 0.321, 0.121);
+	glLineWidth(2.0);
+
+// generare varfuri pentru fiecare arc ce compune butoiul
+// ---------------------------------------------------------
+	//1. arc elipsa stanga
+	genereaza_pct_arc_elipsa(20, 95, 90, 270);
+	//2. arc elipsa dreapta
+	genereaza_pct_arc_elipsa(20, 95, 270, 450);
+	//3. interior 1
+	genereaza_pct_arc_elipsa(16, 95, 90, 270);
+	//4. interior 2
+	genereaza_pct_arc_elipsa(8, 95, 90, 270);
+	//5. interior 3
+	genereaza_pct_arc_elipsa(8, 95, 270, 450);
+	//6. interior 4
+	genereaza_pct_arc_elipsa(16, 95, 270, 450);
+// ---------------------------------------------------------
+	
+// forma butoi
+// ---------------------------------------------------------
+	// linie jos + arc stanga
+	glPushMatrix();
+	glTranslatef(490, 10, 0.0);
+	glBegin(GL_POLYGON);
+		// linie jos
+		glVertex2f(0, -95);
+		glVertex2f(180, -95);
+
+		for (int i = 0; i < c; i++) {
+			glVertex2f(mat[0][i].x, mat[0][i].y);
+		}
+	glEnd();
+	glPopMatrix();
+
+	// linie sus + arc dreapta
+	glPushMatrix();
+	glTranslatef(670, 10, 0.0);
+	glBegin(GL_POLYGON);
+		// linie sus
+		glVertex2f(0, 95);
+		glVertex2f(-180, 95);
+
+		for (int i = 0; i < c; i++) {
+			glVertex2f(mat[1][i].x, mat[1][i].y);
+		}
+	glEnd();
+	glPopMatrix();
+
+// contur butoi exterior
+// ---------------------------------------------------------
+	glColor3f(0.0, 0.0, 0.0);
+	glBegin(GL_LINES);
+		glVertex2f(490, -85); // 180 dif de 36
+		glVertex2f(670, -85);
+
+		glVertex2f(490, 105);
+		glVertex2f(670, 105);
+	glEnd();
+
+	glBegin(GL_LINE_STRIP);
+		for (int i = 0; i < c; i++) {
+			glVertex2f(490 + mat[0][i].x, 10 + mat[0][i].y);
+		}
+	glEnd();
+
+	glBegin(GL_LINE_STRIP);
+		for (int i = 0; i < c; i++) {
+			glVertex2f(670 + mat[1][i].x, 10 + mat[1][i].y);
+		}
+	glEnd();
+// ---------------------------------------------------------
+
+// culori intermediare
+// ---------------------------------------------------------
+	glColor3f(0.682, 0.427, 0.203);
+	glBegin(GL_POLYGON);
+	for (int i = 0; i < c; i++) {
+		glVertex2f(526 + mat[2][i].x, 10 + mat[2][i].y);
+		glVertex2f(562 + mat[3][i].x, 10 + mat[3][i].y);
+	}
+	glEnd();
+
+	glBegin(GL_POLYGON);
+	for (int i = 0; i < c; i++) {
+		glVertex2f(634 + mat[5][i].x, 10 + mat[5][i].y);
+		glVertex2f(598 + mat[4][i].x, 10 + mat[4][i].y);
+	}
+	glEnd();
+// ---------------------------------------------------------
+	
+
+// arce interioare butoi
+// ---------------------------------------------------------
+	glColor3f(0.0, 0.0, 0.0);
+// interior 1
+	glPushMatrix();
+	glTranslatef(526, 10, 0.0);
+	glBegin(GL_LINE_STRIP);
+		for (int i = 0; i < c; i++) {
+			glVertex2f(mat[2][i].x, mat[2][i].y);
+		}
+	glEnd();
+	glPopMatrix();
+
+// interior 2
+	glPushMatrix();
+	glTranslatef(562, 10, 0.0);
+	glBegin(GL_LINE_STRIP);
+		for (int i = 0; i < c; i++) {
+			glVertex2f(mat[3][i].x, mat[3][i].y);
+		}
+	glEnd();
+	glPopMatrix();
+
+// interior 3
+	glPushMatrix();
+	glTranslatef(598, 10, 0.0);
+	glBegin(GL_LINE_STRIP);
+		for (int i = 0; i < c; i++) {
+			glVertex2f(mat[4][i].x, mat[4][i].y);
+		}
+	glEnd();
+	glPopMatrix();
+
+// interior 4
+	glPushMatrix();
+	glTranslatef(634, 10, 0.0);
+	glBegin(GL_LINE_STRIP);
+		for (int i = 0; i < c; i++) {
+			glVertex2f(mat[5][i].x, mat[5][i].y);
+		}
+		glEnd();
+	glPopMatrix();
+// ---------------------------------------------------------
+
+
+// bare butoi
+// ---------------------------------------------------------
+	Point2D* v, * p;
+	int nr = 0;
+	glColor3f(0.5, 0.5, 0.5);
+	glBegin(GL_POLYGON);
+		nr = vector_puncte(v, 0, 475.0, 472.0, 490.0, 1);
+		for (int i = 0; i < nr; i++)
+			if (v[i].y >= 0)
+				glVertex2f(490 + v[i].x, 10 + v[i].y);
+		
+		nr = vector_puncte(p, 1, 688.0, 685.0, 670.0, 0);
+		for (int i = 0; i < nr; i++)
+			if (p[i].y >= 0)
+				glVertex2f(670 + p[i].x, 10 + p[i].y);
+		delete[] v;
+		delete[] p;
+	glEnd();
+
+	glColor3f(0.0, 0.0, 0.0);
+	glBegin(GL_LINES);
+		glVertex2f(475.0, 71.0);
+		glVertex2f(685.0, 71.0);
+
+		glVertex2f(472.0, 52.0);
+		glVertex2f(688.0, 52.0);
+	glEnd();
+
+	glColor3f(0.5, 0.5, 0.5);
+	glBegin(GL_POLYGON);
+		nr = vector_puncte(v, 0, 475.0, 472.0, 490.0, 1);
+		for (int i = 0; i < nr; i++)
+			if (v[i].y <= 0)
+				glVertex2f(490 + v[i].x, 10 + v[i].y);
+
+		nr = vector_puncte(p, 1, 688.0, 685.0, 670.0, 0);
+		for (int i = 0; i < nr; i++)
+			if (p[i].y <= 0)
+				glVertex2f(670 + p[i].x, 10 + p[i].y);
+		delete[] v;
+		delete[] p;
+	glEnd();
+	
+
+	glColor3f(0.0, 0.0, 0.0);
+	glBegin(GL_LINES);
+		glVertex2f(475.0, -51.0);
+		glVertex2f(685.0, -51.0);
+
+		glVertex2f(472.0, -31.0);
+		glVertex2f(688.0, -31.0);
+	glEnd();
+
+// "suruburi" butoi
+// ---------------------------------------------------------
+	glColor3f(0.0, 0.0, 0.0);
+	glPointSize(11.0);
+	glEnable(GL_POINT_SMOOTH);
+	glBegin(GL_POINTS);
+		glVertex2f(491, 62);
+		glVertex2f(532, 62);
+		glVertex2f(578, 62);
+		glVertex2f(625, 62);
+		glVertex2f(667, 62);
+
+		glVertex2f(491, -41);
+		glVertex2f(532, -41);
+		glVertex2f(578, -41);
+		glVertex2f(625, -41);
+		glVertex2f(667, -41);
+	glEnd();
+
+
+	glColor3f(1.0, 1.0, 1.0);
+	glPointSize(7.0);
+	glEnable(GL_POINT_SMOOTH);
+	glBegin(GL_POINTS);
+		glVertex2f(491, 62);
+		glVertex2f(532, 62);
+		glVertex2f(578, 62);
+		glVertex2f(625, 62);
+		glVertex2f(667, 62);
+
+		glVertex2f(491, -41);
+		glVertex2f(532, -41);
+		glVertex2f(578, -41);
+		glVertex2f(625, -41);
+		glVertex2f(667, -41);
+	glEnd();
+// ---------------------------------------------------------
+}
+
 void drawScene(void)
 {
 	glClearColor(0.87, 0.8, 0.73, 0.0);
@@ -255,29 +563,25 @@ void drawScene(void)
 	
 	glColor3f(0.78, 0.69, 0.65);
 	glBegin(GL_POLYGON);
-	glVertex2i(460, -140);// Stanga jos
-	glVertex2i(700, -140); // Dreapta jos
-	glVertex2i(700, 460);  // Dreapta sus
-	glVertex2i(460, 460); // Stanga sus
+		glVertex2i(460, -140);// Stanga jos
+		glVertex2i(700, -140); // Dreapta jos
+		glVertex2i(700, 460);  // Dreapta sus
+		glVertex2i(460, 460); // Stanga sus
 	glEnd();
 
+	deseneaza_butoi();
 
 	//desenam cosul/butoiul/lada
 	glPushMatrix();
-	glTranslated(j, -100.0, 0.0);
-
-	//glColor3f(0.996, 0.365, 0.149);
-	deseneazaLada();
-
-	if (ok == 0)
-	{
-		rsj = 8;
-		rss = -8;
-		rdj = -8;
-		rds = 8;
-	}
-
-	glPopMatrix();
+		glTranslatef(j, -100.0, 0.0);
+		deseneazaLada();
+		if (ok == 0)
+		{
+			rsj = 8;
+			rss = -8;
+			rdj = -8;
+			rds = 8;
+		}
 	glPopMatrix();
 
 	if (ok == 0) {
@@ -319,18 +623,18 @@ void drawScene(void)
 
 	//desenam strugurele
 	glPushMatrix();
-	glTranslated(height, loc_vert, 0.0);
-	deseneazaStrugure();
+		glTranslatef(height, loc_vert, 0.0);
+		deseneazaStrugure();
 	glPopMatrix();
 
 	deseneazaInimi();
+
 	glColor3f(0.78, 0.69, 0.65);
-	// Iarba de sus
 	glBegin(GL_POLYGON);
-	glVertex2i(-100, 420);// Stanga jos
-	glVertex2i(700, 420); // Dreapta jos
-	glVertex2i(700, 460); // Dreapta sus
-	glVertex2i(-100, 460);// Stanga sus
+		glVertex2i(-100, 420);// Stanga jos
+		glVertex2i(700, 420); // Dreapta jos
+		glVertex2i(700, 460); // Dreapta sus
+		glVertex2i(-100, 460);// Stanga sus
 	glEnd();
 	RenderString(200.0f, 432.0f, GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*)"Prinde strugurii!");
 
