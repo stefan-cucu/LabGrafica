@@ -84,6 +84,10 @@ void init(void)
 	glMatrixMode(GL_PROJECTION);
 	glOrtho(left_m, right_m, bottom_m, top_m, -1.0, 1.0);
 	gluOrtho2D(left_m - 1000, right_m + 1000, bottom_m - 1000, top_m + 1000);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glShadeModel(GL_FLAT);
+	glClearColor(0.0, 0.0, 0.0, 1.0);
 }
 
 void PlayMenuSong()
@@ -691,18 +695,18 @@ void deseneaza_butoi() {
 }
 
 void deseneazaFundal() {
-	glClearColor(0.20, 0.09, 0.11, 0.0);
+	glClearColor(0.20, 0.09, 0.11, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	// lumini pe coloane
 	for (int i = 0; i < 3; i++) {
-		glColor3f(0.329, 0.153, 0.184);
+		glColor4f(0.965, 0.827, 0.635, 0.1);
 		//glColor3f(0.494, 0.227, 0.278);
 
 		glBegin(GL_TRIANGLES);
 		glVertex2f(vecpos[i], 520);
-		glVertex2f(vecpos[i] - 100, -50);
-		glVertex2f(vecpos[i] + 100, -50);
+		glVertex2f(vecpos[i] - 110, bottom_m);
+		glVertex2f(vecpos[i] + 110, bottom_m);
 		glEnd();
 
 		glColor3f(0.965, 0.827, 0.635);
@@ -710,9 +714,7 @@ void deseneazaFundal() {
 
 	}
 	glColor3f(0.329, 0.153, 0.184);
-	//glColor3f(0.494, 0.227, 0.278);
 
-	glRectf(-100, -50, 500, -140);
 
 	glColor3f(0.788, 0.561, 0.349);
 	glRectf(458, -160, 700, 460); // dreapta
