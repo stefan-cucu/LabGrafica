@@ -652,18 +652,18 @@ void deseneazaFundal(int key) {
 	switch (key)
 	{
 	case 0:
-		glClearColor(0.0, 0.0, 0.0, 1.0);
+		glClearColor(0.26, 0.23, 0.89, 1.0);
 		break;
 	case 1:
-		glClearColor(1, 0.0, 0.0, 0.0);
+		glClearColor(0.26, 0.23, 0.89, 1.0);
 		keybBackground = 1;
 		break;
 	case 2:
-		glClearColor(0.0, 1.0, 0.0, 0.0);
+		glClearColor(0.16, 0.6, 0.7, 1.0);
 		keybBackground = 2;
 		break;
 	case 3:
-		glClearColor(0.0, 0.0, 1.0, 0.0);
+		glClearColor(0.5, 0.1, 0.5, 1.0);
 		keybBackground = 3;
 		break;
 	}
@@ -671,7 +671,7 @@ void deseneazaFundal(int key) {
 
 	// lumini pe coloane
 	for (int i = 0; i < 3; i++) {
-		glColor4f(0.965, 0.827, 0.635, 0.1);
+		glColor4f(0.965, 0.827, 0.635, 0.2);
 		//glColor3f(0.494, 0.227, 0.278);
 
 		glBegin(GL_TRIANGLES);
@@ -1411,9 +1411,9 @@ int main(int argc, char** argv)
 	glutSpecialFunc(keyboard);
 	glutKeyboardFunc(handleInput);
 	menuBackground = glutCreateMenu(callback_Back);
-	glutAddMenuEntry("Red", 1);
-	glutAddMenuEntry("Green", 2);
-	glutAddMenuEntry("Blue", 3);
+	glutAddMenuEntry("Albastru inchis", 1);
+	glutAddMenuEntry("Albastru deschis", 2);
+	glutAddMenuEntry("Mov", 3);
 
 	menuColor = glutCreateMenu(callback_Color);
 	glutAddMenuEntry("Blueberry ", 0);
