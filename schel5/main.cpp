@@ -80,9 +80,8 @@ void resetStats() {
 	ok = 1;
 }
 
-void init(void)
+void init()
 {
-	glClearColor(0.87, 0.8, 0.73, 0.0);
 	glMatrixMode(GL_PROJECTION);
 	glOrtho(left_m, right_m, bottom_m, top_m, -1.0, 1.0);
 	gluOrtho2D(left_m - 1000, right_m + 1000, bottom_m - 1000, top_m + 1000);
@@ -648,7 +647,25 @@ void deseneaza_butoi() {
 	// ---------------------------------------------------------
 }
 
-void deseneazaFundal() {
+void deseneazaFundal(int key) {
+	switch (key)
+	{
+	case 0:
+		glClearColor(0.0, 0.0, 0.0, 1.0);
+		break;
+	case 1:
+		glClearColor(1, 0.0, 0.0, 0.0);
+		keybBackground = 1;
+		break;
+	case 2:
+		glClearColor(0.0, 1.0, 0.0, 0.0);
+		keybBackground = 2;
+		break;
+	case 3:
+		glClearColor(0.0, 0.0, 1.0, 0.0);
+		keybBackground = 3;
+		break;
+	}
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	// lumini pe coloane
@@ -714,7 +731,7 @@ void deseneazaStruguriPesteButoi() {
 
 void drawScene(void)
 {
-	deseneazaFundal();
+	deseneazaFundal(keybBackground);
 
 	deseneazaStruguriPesteButoi();
 
@@ -1598,28 +1615,11 @@ void callback_Color(int key)
 	currentColor = key;
 }
 
-
-void Initialize(int key)
+void callback_Back(int key)
 {
-	switch (key)
-	{
-	case 0:
-		glClearColor(0.0, 0.0, 0.0, 1.0);
-		break;
-	case 1:
-		glClearColor(1, 0.0, 0.0, 0.0);
-		keybBackground = 1;
-		break;
-	case 2:
-		glClearColor(0.0, 1.0, 0.0, 0.0);
-		keybBackground = 2;
-		break;
-	case 3:
-		glClearColor(0.0, 0.0, 1.0, 0.0);
-		keybBackground = 3;
-		break;
-	}
+	keybBackground = key;
 }
+
 
 int main(int argc, char** argv)
 {
@@ -1641,7 +1641,7 @@ int main(int argc, char** argv)
 	glutReshapeFunc(reshape);
 	glutSpecialFunc(keyboard);
 	glutKeyboardFunc(handleInput);
-	menuBackground = glutCreateMenu(Initialize);
+	menuBackground = glutCreateMenu(callback_Back);
 	glutAddMenuEntry("Red", 1);
 	glutAddMenuEntry("Green", 2);
 	glutAddMenuEntry("Blue", 3);
