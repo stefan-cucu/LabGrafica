@@ -351,6 +351,8 @@ void deseneazaInimi(float scale_factor) {
 	}
 }
 
+void deseneazaBalon();
+
 void deseneazaLada() {
 
 	//glColor3f(0, 0, 0); // contur manere
@@ -415,6 +417,36 @@ void deseneazaLada() {
 
 	DrawBezier(make_pair(-5, 25), make_pair(0, 21), make_pair(5, 25), 10);
 
+	deseneazaBalon();
+}
+
+void deseneazaBalon() {
+	/*glColor3f(1, 0, 0);
+	DrawCircle(200, 200, 50, 50);
+	glColor3f(0, 0, 0);
+	glLineWidth(3.0);
+	glBegin(GL_LINES);
+	glVertex2f(200, 150);
+	glVertex2f(200, 20);
+	glEnd();*/
+
+	/*glColor3f(1, 0, 0);
+	DrawCircle(20, 100, 20, 50);
+	glColor3f(0, 0, 0);
+	glLineWidth(3.0);
+	glBegin(GL_LINES);
+	glVertex2f(20, 80);
+	glVertex2f(20, -90);
+	glEnd();*/
+
+	glColor3f(1, 1, 0);
+	DrawCircle(20, 100, 20, 50);
+	glColor3f(0, 0, 0);
+	glLineWidth(3.0);
+	glBegin(GL_LINES);
+	glVertex2f(20, 80);
+	glVertex2f(20, 10);
+	glEnd();
 }
 
 void deseneaza_butoi() {
@@ -733,6 +765,8 @@ void drawScene(void)
 	deseneazaFundal(keybBackground);
 
 	deseneazaStruguriPesteButoi();
+
+	//deseneazaBalon();
 
 	//desenam cosul/butoiul/lada
 	glPushMatrix();
