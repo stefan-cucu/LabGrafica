@@ -46,6 +46,8 @@ int currentProp = 0;
 map<int, string, greater<int>> playerScores;
 int window_width = 800, window_height = 600;
 int currentMenuPhase = 0, currentInputSelect = -1, currentSceneIndex = 1, currentMenuHoverBtn = 0;
+int menuMain, menuBackground, menuColor;
+int keybBackground, currentColor;
 bool showErrorMsg = 0;
 string username = "", password = "", errorMsg = "";
 CURL* curl;
@@ -78,9 +80,8 @@ void resetStats() {
 	ok = 1;
 }
 
-void init(void)
+void init()
 {
-	glClearColor(0.87, 0.8, 0.73, 0.0);
 	glMatrixMode(GL_PROJECTION);
 	glOrtho(left_m, right_m, bottom_m, top_m, -1.0, 1.0);
 	gluOrtho2D(left_m - 1000, right_m + 1000, bottom_m - 1000, top_m + 1000);
@@ -326,75 +327,31 @@ void startgame(void)
 }
 
 void deseneazaStrugure(float r, float g, float b) {
+	glColor3f(1.0f, 1.0f, 1.0f);
+	glBegin(GL_QUADS);
 
-	// ramura
-	glColor3f(0, 0, 0);
-	glEnable(GL_POINT_SMOOTH);
-	glPointSize(8.0);
-	glBegin(GL_POINTS);
-	glVertex2f(0, 35);
+	glVertex2f(-1.5f, -25.0f);
+
+	glVertex2f(1.5f, -25.0f);
+
+	glVertex2f(1.5f, 10.0f);
+
+	glVertex2f(-1.5f, 10.0f);
+
 	glEnd();
-
-	glColor3f(0.431, 0.271, 0.129);
-	glEnable(GL_POINT_SMOOTH);
-	glPointSize(6.0);
-	glBegin(GL_POINTS);
-	glVertex2f(0, 35);
-	glEnd();
-
-	glColor3f(0, 0, 0);
-	glRecti(-4, 35, 4, 15);
-
-	glColor3f(0.431, 0.271, 0.129);
-	glRecti(-3, 35, 3, 15);
-
-	// boabele
-	glColor3f(0, 0, 0);
-
-	glEnable(GL_POINT_SMOOTH);
-	glPointSize(14.0);
-	glBegin(GL_POINTS);
-		glVertex2f(-15, 15);
-		glVertex2f(-5, 15);
-		glVertex2f(5, 15);
-		glVertex2f(15, 15);
-
-		glVertex2f(-10, 5);
-		glVertex2f(0, 5);
-		glVertex2f(10, 5);
-
-		glVertex2f(-5, -5);
-		glVertex2f(5, -5);
-
-		glVertex2f(0, -15);
-	glEnd();
+	if (currentColor == 0) {
+		glColor3f(0.0f, 1.0f, 1.0f); // change to cyan
+	}
+	if (currentColor == 1) {
+		glColor3f(1.0f, 0.5f, 1.0f); // change to pink
+	}
 
 
-	glColor3f(r, g, b);
+	DrawCircle(0.0f, 10.0f, 10.0f, 100.0f);
 
-	glEnable(GL_POINT_SMOOTH);
-	glPointSize(12.0);
-	glBegin(GL_POINTS);
-		glVertex2f(-15, 15);
-		glVertex2f(-5, 15);
-		glVertex2f(5, 15);
-		glVertex2f(15, 15);
 
-		glVertex2f(-10, 5);
-		glVertex2f(0, 5);
-		glVertex2f(10, 5);
 
-		glVertex2f(-5, -5);
-		glVertex2f(5, -5);
 
-		glVertex2f(0, -15);
-	glEnd();
-
-	// frunza
-	glColor3f(0, 0, 0);
-	DrawElipse(12, 21, 13, 6, 100);
-	glColor3f(0.349, 0.365, 0.282);
-	DrawElipse(12, 21, 12, 5, 100);
 }
 
 void deseneazaInimi(float scale_factor) {
@@ -736,8 +693,25 @@ void deseneaza_butoi() {
 	// ---------------------------------------------------------
 }
 
-void deseneazaFundal() {
-	glClearColor(0.20, 0.09, 0.11, 0.0);
+void deseneazaFundal(int key) {
+	switch (key)
+	{
+	case 0:
+		glClearColor(0.0, 0.0, 0.0, 1.0);
+		break;
+	case 1:
+		glClearColor(1, 0.0, 0.0, 0.0);
+		keybBackground = 1;
+		break;
+	case 2:
+		glClearColor(0.0, 1.0, 0.0, 0.0);
+		keybBackground = 2;
+		break;
+	case 3:
+		glClearColor(0.0, 0.0, 1.0, 0.0);
+		keybBackground = 3;
+		break;
+	}
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	// lumini pe coloane
@@ -803,7 +777,7 @@ void deseneazaStruguriPesteButoi() {
 
 void drawScene(void)
 {
-	deseneazaFundal();
+	deseneazaFundal(keybBackground);
 
 	deseneazaStruguriPesteButoi();
 
@@ -1675,9 +1649,27 @@ void handleInput(unsigned char key, int x, int y)
 	}
 }
 
+void callback_Main(int key)
+{
+	if (key == 0)
+	{
+		exit(0);
+	}
+}
+void callback_Color(int key)
+{
+	currentColor = key;
+}
+
+void callback_Back(int key)
+{
+	keybBackground = key;
+}
+
 
 int main(int argc, char** argv)
 {
+	
 	currentScene = &drawMenu;
 	curl_global_init(CURL_GLOBAL_ALL);
 	if (rememberUser())
@@ -1695,5 +1687,20 @@ int main(int argc, char** argv)
 	glutReshapeFunc(reshape);
 	glutSpecialFunc(keyboard);
 	glutKeyboardFunc(handleInput);
+	menuBackground = glutCreateMenu(callback_Back);
+	glutAddMenuEntry("Red", 1);
+	glutAddMenuEntry("Green", 2);
+	glutAddMenuEntry("Blue", 3);
+
+	menuColor = glutCreateMenu(callback_Color);
+	glutAddMenuEntry("Blueberry ", 0);
+	glutAddMenuEntry("Strawberry ", 1);
+
+	menuMain = glutCreateMenu(callback_Main);
+
+	glutAddSubMenu("Culoare fundal ", menuBackground);
+	glutAddSubMenu("Culoare acadea ", menuColor);
+	glutAddMenuEntry("Iesire ", 0);
+	glutAttachMenu(GLUT_RIGHT_BUTTON);
 	glutMainLoop();
 }
