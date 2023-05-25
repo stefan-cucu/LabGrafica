@@ -4,7 +4,6 @@
 #include <utility>
 #include<cmath>
 #include <GL/freeglut.h>
-#include <curl/curl.h>
 #include <fstream>
 #include <cstdio>
 #include <vector>
@@ -50,7 +49,7 @@ int menuMain, menuBackground, menuColor;
 int keybBackground, currentColor;
 bool showErrorMsg = 0;
 string username = "", password = "", errorMsg = "";
-CURL* curl;
+
 void (*currentScene)(void);
 
 int l = 6;
@@ -66,8 +65,6 @@ typedef struct {
 
 Point2D mat[6][181];
 
-bool storeScoreRequest(int score);
-void getLeaderboardDataRequest();
 
 void resetStats() {
 	contor = 0;
@@ -231,52 +228,10 @@ void menuBarrel()
 {
 	// Draw Barrel
 
-	glColor3f(0.79, 0.56, 0.35);
-	glBegin(GL_TRIANGLES);
-	glVertex2f(185.8, -10.1);
-	glVertex2f(174.6, -83.5);
-	glVertex2f(420.2, -83.5);
-
-	glVertex2f(420.2, -83.5);
-	glVertex2f(403.6, -20.0);
-	glVertex2f(185.8, -10.1);
-	glEnd();
-
 	glColor3f(0, 0, 0);
 	DrawCircle(300, 180, 230, 30);
 	glColor3f(0.79, 0.56, 0.35);
 	DrawCircle(300, 180, 223, 30);
-
-	glColor3f(0, 0, 0);
-	DrawCircle(300, 180, 210, 30);
-	glColor3f(0.79, 0.56, 0.35);
-	DrawCircle(300, 180, 203, 30);
-
-
-	glColor3f(0, 0, 0);
-	glLineWidth(10.0f);
-	DrawRays(300, 180, 205, 23, 15);
-
-	// Draw barrel stand
-
-	glLineWidth(5.0f);
-
-	glBegin(GL_LINES);
-
-	glVertex2f(185.8, -10.1);
-	glVertex2f(177.1, -53.75);
-
-	glVertex2f(175.1, -53.75);
-	glVertex2f(187.0, -53.75);
-
-	glVertex2f(174.6, -83.5);
-	glVertex2f(420.2, -83.5);
-
-	glVertex2f(420.2, -83.5);
-	glVertex2f(403.6, -20.0);
-
-	glEnd();
-	DrawBezier(make_pair(185.9, -53.75), make_pair(170.8, -64.5), make_pair(174.6, -83.5), 3);
 }
 
 void startgame(void)
@@ -303,8 +258,6 @@ void startgame(void)
 					score += 100;
 				}
 				height = vecpos[rand() % 3];
-				currentProp = rand() % 3;
-				difModifier = currentProp == 1 ? 2 : 1;
 				loc_vert = 420;
 				timp += SPEED_INCREASE_PER_GRAPE;			}
 		}
@@ -315,7 +268,6 @@ void startgame(void)
 			}
 			loc_vert = 420;
 			height = vecpos[rand() % 3];
-			currentProp = rand() % 3;
 			difModifier = currentProp == 1 ? 2 : 1;
 			timp += SPEED_INCREASE_PER_GRAPE;
 		}
@@ -323,8 +275,7 @@ void startgame(void)
 	else {
 		if (ok == 1) {
 			ok = 0;
-			storeScoreRequest(score);
-			getLeaderboardDataRequest();
+
 			PlayEndSong();
 		}
 	}
@@ -843,21 +794,7 @@ void drawScene(void)
 
 		menuBarrel();
 		RenderString(220.0f, 300.0f, GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*)"GAME OVER");
-		RenderString(205.0f, 270.0f, GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*)"LEADERBOARD:");
-
-		// Render the leaderboard
-		float x = 205.0f;
-		float y = 250.0f;
-		int rank = 1;
-		for (const auto& player : playerScores) {
-			if (y < 50) continue; // Only show 10
-			string name = player.second;
-			int score = player.first;
-			string text = "Rank " + to_string(rank) + ": " + name + " - " + to_string(score);
-			RenderString(x, y, GLUT_BITMAP_8_BY_13, (const unsigned char*)text.c_str());
-			y -= 20.0f;
-			rank++;
-		}
+		
 		RenderString(225.0f, 20.0f, GLUT_BITMAP_TIMES_ROMAN_24, (const unsigned char*)"Back to menu");
 		if (currentMenuHoverBtn == 1) {
 			glLineWidth(2.0f);
@@ -1266,156 +1203,6 @@ size_t WriteCallback(void* contents, size_t size, size_t nmemb, string* response
 	return totalSize;
 }
 
-bool loginRequest()
-{
-	CURL* curl = curl_easy_init();
-	bool ok = false;
-	if (curl) {
-		string postData = "{\"username\":\"" + username + "\",\"password\":\"" + password + "\"}";
-
-		curl_easy_setopt(curl, CURLOPT_URL, "https://grafica-backend.onrender.com/login");
-		curl_easy_setopt(curl, CURLOPT_POST, 1L);
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postData.c_str());
-
-		struct curl_slist* headers = nullptr;
-		headers = curl_slist_append(headers, "Content-Type: application/json");
-		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-
-		string response;
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
-		CURLcode res = curl_easy_perform(curl);
-
-		if (res != CURLE_OK) {
-			cerr << "LOGIN FAILED: " << curl_easy_strerror(res) << endl;
-			ok = false;
-			errorMsg = extractMessage(response);
-		}
-		else {
-			long responseCode;
-			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
-			if (responseCode != 200) {
-				errorMsg = extractMessage(response);
-				cerr << "LOGIN FAILED: " << errorMsg << endl;
-				ok = false;
-			}
-			else {
-				cout << "LOGIN RESP: " << response << endl;
-				ok = true;
-			}
-		}
-
-		curl_global_cleanup();
-	}
-	return ok;
-
-}
-
-bool signupRequest()
-{
-	CURL* curl = curl_easy_init();
-	bool ok = true;
-	if (curl) {
-		string postData = "{\"username\":\"" + username + "\",\"password\":\"" + password + "\"}";
-
-		curl_easy_setopt(curl, CURLOPT_URL, "https://grafica-backend.onrender.com/signup");
-		curl_easy_setopt(curl, CURLOPT_POST, 1L);
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postData.c_str());
-
-		struct curl_slist* headers = nullptr;
-		headers = curl_slist_append(headers, "Content-Type: application/json");
-		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-
-		string response;
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
-		CURLcode res = curl_easy_perform(curl);
-
-		if (res != CURLE_OK) {
-			cerr << "SIGNUP FAILED: " << curl_easy_strerror(res) << endl;
-			ok = false;
-			errorMsg = extractMessage(response);
-		}
-		else {
-			long responseCode;
-			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
-			if (responseCode != 200) {
-				errorMsg = extractMessage(response);
-				cerr << "SIGNUP FAILED: " << errorMsg << endl;
-				ok = false;
-			}
-			else {
-				cout << "SIGNUP RESP: " << response << endl;
-				ok = true;
-			}
-		}
-		curl_global_cleanup();
-	}
-	return ok;
-}
-
-bool storeScoreRequest(int score)
-{
-	CURL* curl = curl_easy_init();
-	bool ok = true;
-	if (curl) {
-		string postData = "{\"username\":\"" + username + "\",\"score\":\"" + to_string(score) + "\"}";
-
-		curl_easy_setopt(curl, CURLOPT_URL, "https://grafica-backend.onrender.com/store_score");
-		curl_easy_setopt(curl, CURLOPT_POST, 1L);
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, postData.c_str());
-
-		struct curl_slist* headers = nullptr;
-		headers = curl_slist_append(headers, "Content-Type: application/json");
-		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-
-		string response;
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
-		CURLcode res = curl_easy_perform(curl);
-
-		if (res != CURLE_OK) {
-			cerr << "STORE SCORE FAILED: " << curl_easy_strerror(res) << endl;
-			ok = false;
-			errorMsg = extractMessage(response);
-		}
-		else {
-			long responseCode;
-			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
-			if (responseCode != 200) {
-				errorMsg = extractMessage(response);
-				cerr << "STORE SCORE FAILED: " << errorMsg << endl;
-				ok = false;
-			}
-			else {
-				cout << "STORE SCORE RESP: " << response << endl;
-				ok = true;
-			}
-		}
-		curl_global_cleanup();
-	}
-	return ok;
-}
-
-void getLeaderboardDataRequest()
-{
-	CURL* curl = curl_easy_init();
-	vector<pair<int, string>> scores;
-	if (curl) {
-		curl_easy_setopt(curl, CURLOPT_URL, "https://grafica-backend.onrender.com/top_scores");
-
-		string response;
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
-		CURLcode res = curl_easy_perform(curl);
-		cout << response << endl;
-		scores = parseScores(response);
-		for (const auto& score : scores) {
-			playerScores[score.first] = score.second;
-		}
-	}
-}
-
 void saveUser()
 {
 	ofstream outputFile("saved.txt");
@@ -1432,30 +1219,6 @@ void saveUser()
 	}
 }
 
-bool rememberUser()
-{
-	ifstream inputFile("saved.txt");
-	if (inputFile.is_open()) {
-		getline(inputFile, username);
-		getline(inputFile, password);
-
-		inputFile.close();
-		if (!loginRequest()) {
-			username = "";
-			password = "";
-			cerr << "Invalid user in save file" << endl;
-			return 0;
-		}
-		else {
-			cout << "User loaded successfully." << endl;
-			return 1;
-		}
-	}
-	else {
-		cerr << "Failed to open user save file." << endl;
-		return 0;
-	}
-}
 
 void miscast(void)
 {
@@ -1512,43 +1275,7 @@ void handleClick(int button, int state, int x, int y)
 		}
 	}
 	else if (currentSceneIndex == 0) {
-		if (currentMenuPhase == 0 || currentMenuPhase == 1) {
-			if (state == GLUT_DOWN) {
-				if (x >= 200 && x <= 500 && 460 - y >= 200 && 460 - y <= 240)
-					currentInputSelect = 0;
-				if (x >= 200 && x <= 500 && 460 - y >= 140 && 460 - y <= 180)
-					currentInputSelect = 1;
-
-				if (700 - x >= 250 && 700 - x <= 350 && 460 - y >= 85 && 460 - y <= 110) {
-					username = "";
-					password = "";
-					currentInputSelect = -1;
-					currentMenuPhase = currentMenuPhase == 0 ? 1 : 0;
-				}
-				if (700 - x >= 270 && 700 - x <= 330 && 460 - y >= 45 && 460 - y <= 70)
-				{
-					if (currentMenuPhase == 0) {
-						if (loginRequest()) {
-							saveUser();
-							currentMenuPhase = 2;
-						}
-						else {
-							showErrorMsg = 1;
-						}
-					}
-					else {
-						if (signupRequest()) {
-							saveUser();
-							currentMenuPhase = 2;
-						}
-						else {
-							showErrorMsg = 1;
-						}
-					}
-				}
-			}
-		}
-		else if (currentMenuPhase == 2) {
+		if (currentMenuPhase == 2) {
 			if (state == GLUT_DOWN) {
 				x = 700 - x;
 				if (x >= 240 && x <= 350 && 460 - y >= 190 && 460 - y <= 230)
@@ -1579,10 +1306,7 @@ void handleClick(int button, int state, int x, int y)
 			x = 700 - x;
 			if (x >= 225 && x <= 370 && 460 - y >= 0 && 460 - y <= 50)
 			{
-				currentSceneIndex = 0;
-				PlayMenuSong();
-				glutDisplayFunc(drawMenu);
-				currentMenuHoverBtn = 0;
+				exit(0);
 			}
 		}
 	}
@@ -1673,9 +1397,6 @@ int main(int argc, char** argv)
 {
 	
 	currentScene = &drawMenu;
-	curl_global_init(CURL_GLOBAL_ALL);
-	if (rememberUser())
-		currentMenuPhase = 2;
 	PlayMenuSong();
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
