@@ -326,75 +326,26 @@ void startgame(void)
 }
 
 void deseneazaStrugure(float r, float g, float b) {
+	glColor3f(1.0f, 1.0f, 1.0f);
+	glBegin(GL_QUADS);
 
-	// ramura
-	glColor3f(0, 0, 0);
-	glEnable(GL_POINT_SMOOTH);
-	glPointSize(8.0);
-	glBegin(GL_POINTS);
-	glVertex2f(0, 35);
+	glVertex2f(-1.5f, -25.0f);
+
+	glVertex2f(1.5f, -25.0f);
+
+	glVertex2f(1.5f, 10.0f);
+
+	glVertex2f(-1.5f, 10.0f);
+
 	glEnd();
 
-	glColor3f(0.431, 0.271, 0.129);
-	glEnable(GL_POINT_SMOOTH);
-	glPointSize(6.0);
-	glBegin(GL_POINTS);
-	glVertex2f(0, 35);
-	glEnd();
+	glColor3f(1.0f, 0.5f, 1.0f);
 
-	glColor3f(0, 0, 0);
-	glRecti(-4, 35, 4, 15);
-
-	glColor3f(0.431, 0.271, 0.129);
-	glRecti(-3, 35, 3, 15);
-
-	// boabele
-	glColor3f(0, 0, 0);
-
-	glEnable(GL_POINT_SMOOTH);
-	glPointSize(14.0);
-	glBegin(GL_POINTS);
-		glVertex2f(-15, 15);
-		glVertex2f(-5, 15);
-		glVertex2f(5, 15);
-		glVertex2f(15, 15);
-
-		glVertex2f(-10, 5);
-		glVertex2f(0, 5);
-		glVertex2f(10, 5);
-
-		glVertex2f(-5, -5);
-		glVertex2f(5, -5);
-
-		glVertex2f(0, -15);
-	glEnd();
+	DrawCircle(0.0f, 10.0f, 10.0f, 100.0f);
 
 
-	glColor3f(r, g, b);
 
-	glEnable(GL_POINT_SMOOTH);
-	glPointSize(12.0);
-	glBegin(GL_POINTS);
-		glVertex2f(-15, 15);
-		glVertex2f(-5, 15);
-		glVertex2f(5, 15);
-		glVertex2f(15, 15);
 
-		glVertex2f(-10, 5);
-		glVertex2f(0, 5);
-		glVertex2f(10, 5);
-
-		glVertex2f(-5, -5);
-		glVertex2f(5, -5);
-
-		glVertex2f(0, -15);
-	glEnd();
-
-	// frunza
-	glColor3f(0, 0, 0);
-	DrawElipse(12, 21, 13, 6, 100);
-	glColor3f(0.349, 0.365, 0.282);
-	DrawElipse(12, 21, 12, 5, 100);
 }
 
 void deseneazaInimi(float scale_factor) {
