@@ -45,7 +45,7 @@ int vieti = 3;
 int currentProp = 0;
 map<int, string, greater<int>> playerScores;
 int window_width = 800, window_height = 600;
-int currentMenuPhase = 0, currentInputSelect = -1, currentSceneIndex = 0, currentMenuHoverBtn = 0;
+int currentMenuPhase = 0, currentInputSelect = -1, currentSceneIndex = 1, currentMenuHoverBtn = 0;
 bool showErrorMsg = 0;
 string username = "", password = "", errorMsg = "";
 CURL* curl;
@@ -441,21 +441,67 @@ void deseneazaInimi(float scale_factor) {
 
 void deseneazaLada() {
 
-	glColor3f(0, 0, 0); // contur manere
-	glRecti(-46, -16, -34, 31);
-	glRecti(34, -14, 46, 31);
+	//glColor3f(0, 0, 0); // contur manere
+	//glRecti(-46, -16, -34, 31);
+	//glRecti(34, -14, 46, 31);
 
-	glColor3f(0.525, 0.306, 0.114); // manere
-	glRecti(-45, -15, -35, 30);
-	glRecti(35, -15, 45, 30);
+	//glColor3f(0.525, 0.306, 0.114); // manere
+	//glRecti(-45, -15, -35, 30);
+	//glRecti(35, -15, 45, 30);
 
-	glColor3f(0, 0, 0); // contur
-	glRecti(-46, -16, 46, 1);
-	glRecti(-46, 4, 46, 21);
+	//glColor3f(0, 0, 0); // contur
+	//glRecti(-46, -16, 46, 1);
+	//glRecti(-46, 4, 46, 21);
 
-	glColor3f(0.737, 0.463, 0.22);
-	glRecti(-45, -15, 45, 0);
-	glRecti(-45, 5, 45, 20);
+	//glColor3f(0.737, 0.463, 0.22);
+	//glRecti(-45, -15, 45, 0);
+	//glRecti(-45, 5, 45, 20);
+	glColor3f(0.909, 0.74, 0.67);
+
+	glBegin(GL_LINES);
+
+	glVertex2i(0, -6);
+	glVertex2i(-15, 12);
+
+	glVertex2i(0, -6);
+	glVertex2i(15, 12);
+
+	glVertex2i(-10, -19);
+	glVertex2i(-10, -30);
+
+	glVertex2i(10, -19);
+	glVertex2i(10, -30);
+
+	glEnd();
+
+	glBegin(GL_TRIANGLES);
+	glColor3f(0.976, 0.258, 0.619);
+	glVertex2i(0, 22);
+	glVertex2i(-17, -20);
+	glVertex2i(17, -20);
+
+	glColor3f(0.427, 0.278, 0.188);
+	glVertex2i(2, 34);
+	glVertex2i(8, 46);
+	glVertex2i(16, 38);
+
+	glVertex2i(-2, 34);
+	glVertex2i(-8, 46);
+	glVertex2i(-16, 38);
+	glEnd();
+
+	glColor3f(0.909, 0.74, 0.67);
+	DrawCircle(0, 30, 12, 20);
+
+	glColor3f(0, 0, 0);
+
+	glPointSize(1);
+	glBegin(GL_POINTS);
+	glVertex2i(4, 32);
+	glVertex2i(-4, 32);
+	glEnd();
+
+	DrawBezier(make_pair(-5, 25), make_pair(0, 21), make_pair(5, 25), 10);
 
 }
 
@@ -1643,7 +1689,7 @@ int main(int argc, char** argv)
 	glutInitWindowPosition(100, 100);
 	glutCreateWindow("Prinde strugurii");
 	init();
-	glutDisplayFunc(drawMenu);
+	glutDisplayFunc(drawScene);
 	glutMouseFunc(handleClick);
 	glutPassiveMotionFunc(handleHover);
 	glutReshapeFunc(reshape);
